@@ -24,7 +24,7 @@ function flush(horizon = 8000) {
   }
 }
 const root = path.join(__dirname, "..");
-for (const f of ["js/core.js", "js/net.js", "js/games/blackjack.js", "js/games/roulette.js", "js/games/baccarat.js", "js/games/craps.js", "js/games/poker3.js", "js/games/solo.js"])
+for (const f of ["js/core.js", "js/net.js", "js/games/blackjack.js", "js/games/roulette.js", "js/games/baccarat.js", "js/games/craps.js", "js/games/poker3.js", "js/games/holdem.js", "js/games/solo.js"])
   vm.runInThisContext(fs.readFileSync(path.join(root, f), "utf8"), { filename: f });
 const GA = globalThis.GA;
 GA.me.sound = false; GA.reduced = true;
@@ -242,6 +242,74 @@ function p3(deal, decision = "play", pp = 0) {
     const before = chips();
     act({ k: "rebet", x: 2 });
     check("Roulette: Rebet ×2 repeats last bets at double size", [T.pub.bets[me] && T.pub.bets[me].red, before - chips()], [200, 200]);
+  })();
+})();
+
+
+/* ================= TEXAS HOLD'EM ================= */
+(() => {
+  const B = cs => GA.rules.holdemBest(cards(cs)), CMP = GA.rules.holdemCmp;
+  check("Hold'em: royal flush recognised from 7 cards", B("Ah Kh Qh Jh 10h 2c 3d").name, "Royal flush");
+  check("Hold'em: wheel A-2-3-4-5 is a straight", B("As 2h 3d 4c 5s Kd 9h").name, "Straight");
+  check("Hold'em: full house beats flush", CMP(B("Ks Kh Kd 4c 4s 2h 9h").score, B("Ah 9h 7h 4h 2h Kc 3d").score) > 0, true);
+  check("Hold'em: kicker decides two pair", CMP(B("Ks Kh 9d 9c Ah 2s 3c").score, B("Kc Kd 9h 9s Qh 2d 3h").score) > 0, true);
+  check("Hold'em: best five of seven (six-card flush uses the top five)", B("Ah Kh 9h 7h 4h 2h Qc").name, "Flush");
+
+  // Set up a room with extra players.
+  function room(stacks) {
+    GA.net.startSolo(); flush();
+    const H = GA.net.host, ids = [GA.me.id, "p2", "p3", "p4"].slice(0, stacks.length);
+    ids.slice(1).forEach((pid, i) => H.add(pid, { name: "P" + (i + 2), color: "#5fc7d6", chips: 100000, at: "holdem" }));
+    H.players[GA.me.id].chips = 100000;
+    const T = H.table("holdem");
+    const act = (pid, a, h = 1000) => { H.handle(pid, { t: "act", g: "holdem", a }); flush(h); };
+    return { H, T, ids, act };
+  }
+  // Heads-up: button posts the small blind and acts first before the flop, last after it.
+  (() => {
+    const { H, T, ids, act } = room([2000, 2000]);
+    T.priv.rig = cards("2c 3d 4h 5s 9c 7d 8h 10s Jc Qd Kh");
+    act(ids[0], { k: "sit", seat: 0, buy: 2000 }); act(ids[1], { k: "sit", seat: 3, buy: 2000 }, 3500);
+    const P = T.pub;
+    check("Hold'em heads-up: button posts small blind", [P.button, P.sb, P.bb, P.seats[0].bet, P.seats[3].bet], [0, 0, 3, 25, 50]);
+    check("Hold'em heads-up: button acts first preflop", P.toAct, 0);
+    act(ids[0], { k: "raise", to: 70 });
+    check("Hold'em: a raise smaller than the big blind is refused", P.seats[0].bet, 25);
+    act(ids[0], { k: "call" }); act(ids[1], { k: "check" });
+    check("Hold'em heads-up: big blind acts first after the flop", [P.phase, P.toAct, P.board.length], ["flop", 3, 3]);
+    const before = H.players[ids[1]].chips;
+    act(ids[1], { k: "raise", to: 100 }); act(ids[0], { k: "fold" });
+    check("Hold'em: everyone folds, last player takes the pot (50+50+100)", [P.phase, P.seats[3].stack], ["showdown", 2050]);
+    void before;
+  })();
+  // Three-way all-in with side pot.
+  (() => {
+    const { T, ids, act } = room([1000, 3000, 3000]);
+    // deal order starts left of the button (seat 0 is button on hand 1): seat1, seat2, seat0, seat1, seat2, seat0
+    T.priv.rig = cards("Kc 2d As Kd 3h Ah 4c Qs Jh 9d 8c 7s 6c 5h");
+    act(ids[0], { k: "sit", seat: 0, buy: 1000 }); act(ids[1], { k: "sit", seat: 1, buy: 3000 }); act(ids[2], { k: "sit", seat: 2, buy: 3000 }, 3500);
+    const P = T.pub;
+    check("Hold'em 3-handed: blinds are the two seats after the button", [P.button, P.sb, P.bb], [0, 1, 2]);
+    act(ids[0], { k: "raise", to: 1000 });
+    act(ids[1], { k: "raise", to: 3000 });
+    act(ids[2], { k: "call" }, 1200);
+    check("Hold'em: board runs out when everyone is all in", [P.phase, P.board.length], ["showdown", 5]);
+    // A (seat0) has aces = best, B (seat1) kings, C (seat2) deuce-trey.
+    check("Hold'em side pot: short stack wins main pot (3,000), kings win side pot (4,000)", [P.seats[0].stack, P.seats[1].stack, P.seats[2].stack], [3000, 4000, 0]);
+    check("Hold'em side pot: two pots built", P.results.map(r => r.amt), [3000, 4000]);
+  })();
+  // Private cards: a player's snapshot only carries their own hole cards.
+  (() => {
+    const { H, T, ids, act } = room([2000, 2000]);
+    act(ids[0], { k: "sit", seat: 0, buy: 2000 }); act(ids[1], { k: "sit", seat: 1, buy: 2000 }, 3500);
+    const mine = H.snapshot(ids[0]).tables.holdem, theirs = H.snapshot(ids[1]).tables.holdem;
+    const leak = JSON.stringify(theirs).includes(JSON.stringify(T.priv.hole[ids[0]][0])) && JSON.stringify(theirs).includes(JSON.stringify(T.priv.hole[ids[0]][1]));
+    check("Hold'em: you see your own two cards", mine.mine && mine.mine.length, 2);
+    check("Hold'em: other players' snapshots don't contain your cards", [JSON.stringify(theirs.mine) === JSON.stringify(T.priv.hole[ids[1]]), leak], [true, false]);
+    // leaving returns your stack
+    const before = H.players[ids[1]].chips;
+    act(ids[1], { k: "leave" });
+    check("Hold'em: leaving pays your table stack back to your balance", H.players[ids[1]].chips - before > 0, true);
   })();
 })();
 

@@ -131,11 +131,12 @@
     publish() {
       if (this.pending) return;
       this.pending = true;
-      queueMicrotask(() => { this.pending = false; GA.net._fromHost(this.snapshot()); });
+      queueMicrotask(() => { this.pending = false; GA.net._fromHost(this); });
     }
-    snapshot() {
+    // Each player gets their own copy, so games can hide private cards (poker hole cards).
+    snapshot(pid) {
       const tables = {};
-      for (const g in this.tables) tables[g] = this.tables[g].pub;
+      for (const g in this.tables) { const E = GA.engines[g]; tables[g] = E && E.redact ? E.redact(this.tables[g], pid) : this.tables[g].pub; }
       return { code: GA.net.code, host: GA.me.id, now: Date.now(), players: this.players, tables, chat: this.chat.slice(-60), evts: this.evts.slice(-40) };
     }
     stopTimers() { for (const k in this.timers) clearTimeout(this.timers[k]); this.timers = {}; }
@@ -152,10 +153,9 @@
       if (me && me.chips !== GA.me.chips) { GA.me.chips = me.chips; GA.saveMe(); }
       for (const f of this.subs) { try { f(snap); } catch (e) { console.error(e); } }
     },
-    _fromHost(snap) {
-      const json = JSON.stringify(snap);
-      for (const c of this.conns.values()) if (c.open) { try { c.send({ t: "snap", s: snap }); } catch (e) {} }
-      this._emit(JSON.parse(json));
+    _fromHost(host) {
+      for (const [pid, c] of this.conns) if (c.open) { try { c.send({ t: "snap", s: host.snapshot(pid) }); } catch (e) {} }
+      this._emit(JSON.parse(JSON.stringify(host.snapshot(GA.me.id))));
     },
     send(m) {
       if (this.mode === "client") { if (this.conn && this.conn.open) this.conn.send(m); else GA.toast("Reconnecting to the room…"); }

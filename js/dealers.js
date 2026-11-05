@@ -257,6 +257,27 @@
       }
     }
   };
+  CHARS.ivy = {
+    name: "Ivy", title: "Dealer · Hold'em",
+    look: Object.assign({}, CHARS.celeste.look, {
+      skin: ["#f8dcc6", "#e3b493", "#b8845f"], hair: ["#8a5440", "#3a1a12", "#120604"], iris: ["#6ac0b8", "#1a5050"],
+      lips: ["#c4284e", "#6a0a24"], shadow: "#2f6a6a", blush: "#ff7a8a", browC: "#3a1a12", bg: "#0f3a3a",
+      defs: u => `<linearGradient id="${u}sat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ac0b0"/><stop offset=".4" stop-color="#0f5a56"/><stop offset=".65" stop-color="#1f8a82"/><stop offset="1" stop-color="#063230"/></linearGradient>`
+    }),
+    lines: {
+      greet: ["Welcome to the Hold'em room, {n}. Here you play each other, not me.", "Take a seat, {n}. I just deal. The bluffing is on you.", "Cards are fresh, chips are stacked. Who's feeling brave?"],
+      deal: ["Two cards each. Keep them close.", "Shuffle up and deal.", "New hand. Poker faces on, everyone."],
+      turn: ["Action's on you, {n}.", "Your move, darling. Take your time. Thirty seconds of it.", "Check, bet or fold, {n}. I'm watching."],
+      allin: ["{n} is ALL IN!", "All in from {n}. Somebody's feeling lucky.", "Ooh, {n} shoved. Who's calling?"],
+      win: ["Ship it to {n}. Nicely played.", "That pot is yours, {n}.", "You read that table like a book."],
+      lose: ["Tough beat, {n}. Shake it off.", "Not your hand. The next one might be.", "Ouch. Even the pros lose that one."],
+      big: ["Now THAT is a hand. I'm blushing.", "Monster! Somebody frame that."],
+      other: ["Pot to {n}.", "{n} drags the pot. Respect.", "Nice hand, {n}."],
+      bet: ["Chips in the middle.", "Bold."],
+      poke: ["I can't tell you what they're holding. I can tell you you look good.", "Tap me again and I'll start reading your tells.", "My poker face never slips. Almost never.", "Every pot I push to you makes my night."],
+      tip: ["Thank you, {n}. Dealers remember.", "Ooh, a tip. You're my favorite at this table.", "Generous. I like that in a player."]
+    }
+  };
   for (const k in CHARS) CHARS[k].svg = () => portrait(CHARS[k].look);
   GA.DEALERS = CHARS;
 

@@ -51,7 +51,7 @@
       ctx.result(pid, net, bestMult === 36 ? "Straight up!" : "");
       T.priv.last[pid] = Object.assign({}, b); P.canRebet[pid] = true;
     }
-    P.history.unshift(n); P.history = P.history.slice(0, 16);
+    P.history.unshift(n); P.history = P.history.slice(0, 200);
     P.phase = "payout"; P.winning = n;
     P.msg = `${n} ${n === 0 ? "green" : REDS.has(n) ? "red" : "black"}.`;
     ctx.after(4500, () => { P.phase = "betting"; P.bets = {}; P.results = {}; T.priv.hist = {}; P.msg = "Place your bets."; });
@@ -131,6 +131,37 @@
     }
   };
 
+
+  // The casino display: last results, hot and cold numbers, and how the outside bets have run.
+  function statsHTML(hist) {
+    const H = hist.slice(0, 100), n = H.length;
+    const ball = x => `<span class="hball ${colorOf(x)}">${x}</span>`;
+    if (!n) return `<div class="rb-head"><span class="eyebrow">Wheel stats</span><span class="muted" style="font-size:13px">Hot and cold numbers show up here once the wheel has spun.</span></div>`;
+    const count = Array(37).fill(0), since = Array(37).fill(null);
+    H.forEach((x, i) => { count[x]++; if (since[x] === null) since[x] = i; });
+    const hot = [...Array(37).keys()].filter(x => count[x] > 0).sort((a, b) => count[b] - count[a] || since[a] - since[b]).slice(0, 5);
+    const cold = [...Array(37).keys()].sort((a, b) => (since[b] === null ? 999 : since[b]) - (since[a] === null ? 999 : since[a]) || a - b).slice(0, 5);
+    const pct = f => Math.round((H.filter(f).length / n) * 100);
+    const bar = (label, parts) => `<div class="rb-bar"><span class="rb-l">${label}</span><div class="rb-track">${parts.map(([p, cls, t]) => `<span class="${cls}" style="flex:${Math.max(p, 0.001)}" title="${t} ${p}%">${p >= 12 ? `${t} ${p}%` : ""}</span>`).join("")}</div></div>`;
+    const red = pct(x => REDS.has(x)), zero = pct(x => x === 0), black = 100 - red - zero;
+    const odd = pct(x => x && x % 2), even = pct(x => x && !(x % 2));
+    const lo = pct(x => x >= 1 && x <= 18), hi = pct(x => x >= 19);
+    const d1 = pct(x => x >= 1 && x <= 12), d2 = pct(x => x >= 13 && x <= 24), d3 = pct(x => x >= 25);
+    // current streak of the same colour
+    let streak = 1; const c0 = colorOf(H[0]); while (streak < n && colorOf(H[streak]) === c0) streak++;
+    return `<div class="rb-head"><span class="eyebrow">Wheel stats · last ${n} spin${n > 1 ? "s" : ""}</span><span class="rb-streak">${streak > 1 ? `${streak} ${c0 === "r" ? "reds" : c0 === "b" ? "blacks" : "zeros"} in a row` : ""}</span></div>
+      <div class="rb-grid">
+        <div class="rb-box"><div class="rb-t">🔥 Hot numbers</div><div class="rb-nums">${hot.map(x => `<span class="rb-n">${ball(x)}<small>${count[x]}×</small></span>`).join("")}</div></div>
+        <div class="rb-box"><div class="rb-t">❄️ Cold numbers</div><div class="rb-nums">${cold.map(x => `<span class="rb-n">${ball(x)}<small>${since[x] === null ? `${n}+` : since[x]} ago</small></span>`).join("")}</div></div>
+        <div class="rb-box rb-wide">
+          ${bar("Colour", [[red, "r", "Red"], [zero, "g", "0"], [black, "b", "Black"]])}
+          ${bar("Odd / even", [[odd, "o1", "Odd"], [zero, "g", "0"], [even, "o2", "Even"]])}
+          ${bar("Low / high", [[lo, "o1", "1–18"], [zero, "g", "0"], [hi, "o2", "19–36"]])}
+          ${bar("Dozens", [[d1, "o1", "1st"], [d2, "o2", "2nd"], [d3, "o3", "3rd"], [zero, "g", "0"]])}
+        </div>
+      </div>
+      <p class="muted" style="font-size:12px;margin:10px 0 0">Every spin is independent. Hot and cold numbers are fun to follow, but they don't change the odds.</p>`;
+  }
   /* ================= VIEW ================= */
   GA.views.roulette = {
     title: "Roulette",
@@ -153,6 +184,7 @@
         </div>
         <div class="table-bar"><div class="status" data-status></div><div class="controls" data-controls></div></div>
         <div style="margin-top:14px" data-rack></div>
+        <div class="rboard" data-rboard aria-label="Wheel statistics"></div>
         <p class="rules" style="margin-top:14px">Straight up pays 35:1. Dozens and columns pay 2:1. Red, black, odd, even, 1–18 and 19–36 pay even money. Zero loses every outside bet.</p>`;
       const q = s => el.querySelector(s);
       const dealer = GA.dealer(q("[data-dealer]"), "valentina");
@@ -261,7 +293,8 @@
             c.disabled = P.phase !== "betting";
             c.classList.toggle("hit", P.winning != null && (k === "n" + P.winning || (wins(k, P.winning) > 0 && k[0] !== "n")));
           }
-          q("[data-hist]").innerHTML = `<span class="eyebrow" style="margin-right:6px">Last spins</span>` + (P.history.length ? P.history.map(n => `<span class="hball ${colorOf(n)}">${n}</span>`).join("") : `<span class="muted" style="font-size:13px">No spins yet</span>`);
+          q("[data-rboard]").innerHTML = statsHTML(P.history);
+          q("[data-hist]").innerHTML = `<span class="eyebrow" style="margin-right:6px">Last spins</span>` + (P.history.length ? P.history.slice(0, 20).map(n => `<span class="hball ${colorOf(n)}">${n}</span>`).join("") : `<span class="muted" style="font-size:13px">No spins yet</span>`);
           const total = Object.values(mine).reduce((a, b) => a + b, 0);
           const betting = P.phase === "betting";
           q("[data-controls]").innerHTML = betting ? (total

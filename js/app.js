@@ -5,6 +5,7 @@
 
   const GAMES = [
     { id: "blackjack", name: "Twenty-One Club", tag: "Blackjack · double deck · 5 variants", desc: "Classic, Double Down Frenzy, Free Bet, Double Exposure and Spanish 21, plus Perfect Pairs and 21+3.", dealer: "scarlett", mp: true, art: "21", g: "linear-gradient(160deg,#0f4a36,#081f17)" },
+    { id: "holdem", name: "The Hold'em Room", tag: "Texas Hold'em · Player vs player", desc: "Real poker against your friends. No-limit Hold'em for up to 8, with side pots and private hole cards.", dealer: "ivy", mp: true, art: "♣", g: "linear-gradient(160deg,#0f4a48,#041a1a)" },
     { id: "roulette", name: "Roulette Royale", tag: "Single zero", desc: "One wheel for the whole room. Straight up pays 35 to 1.", dealer: "valentina", mp: true, art: "◎", g: "linear-gradient(160deg,#5a1222,#1e050b)" },
     { id: "craps", name: "The Hot Table", tag: "Craps · Shooter rotates", desc: "Pass line, odds, the field, place bets, hardways and the long-shot props.", dealer: "roxy", mp: true, art: "⚃", g: "linear-gradient(160deg,#13583f,#062014)" },
     { id: "baccarat", name: "Salon Baccarat", tag: "Punto banco", desc: "Player, Banker or Tie, with pair side bets and a bead road.", dealer: "celeste", mp: true, art: "9", g: "linear-gradient(160deg,#164a70,#06182a)" },
@@ -20,6 +21,9 @@
       <p><b>A round:</b> sit, tap the Bet circle to add your chip, then deal. Everyone gets two cards; the dealer shows one card and keeps one face down. On your turn: <b>Hit</b> takes a card, <b>Stand</b> keeps your total, <b>Double</b> doubles your bet for exactly one more card, <b>Split</b> turns a pair into two hands (each with its own bet), <b>Surrender</b> gives up half your bet before playing (Classic and Spanish 21). Over 21 is a bust and loses right away, even if the dealer busts later.</p>
       <p><b>The dealer</b> plays last and must hit 16 or less. In Classic the dealer stands on every 17; in the other games the dealer hits a soft 17 (a 17 counting an ace as 11). If the dealer shows an ace you're offered <b>insurance</b>: half your bet, pays 2:1 if the dealer has blackjack. Wins pay 1:1, blackjack pays 3:2, ties push (you get your bet back).</p>
       <p><b>The variants:</b> all deal from two decks shuffled together (104 cards; 96 in Spanish 21). Split aces get one card each, and 21 after a split is not a blackjack. The rules line above the table spells out what changes in each one.</p>`,
+    holdem: `<p><b>You play each other.</b> Tap an open seat and buy in for 20 to 200 big blinds. Your stack stays on the table until you leave, then it goes back to your balance. A hand starts automatically once two or more players are seated.</p>
+      <p><b>A hand:</b> the two players left of the dealer button post the small and big blind. Everyone gets two private cards. Betting goes around four times: before the flop, after the flop (3 shared cards), after the turn (4th card) and after the river (5th card). On your turn you can <b>fold</b>, <b>check</b> (if nobody has bet), <b>call</b>, or <b>bet/raise</b>. This is no-limit: a raise must be at least the size of the last bet or raise, and you can go all in any time. You get 30 seconds per decision.</p>
+      <p><b>Winning:</b> if everyone else folds, you take the pot without showing. Otherwise, at the showdown the best five-card hand from your two cards plus the five on the board wins: royal flush, straight flush, four of a kind, full house, flush, straight, three of a kind, two pair, pair, high card. Ties split the pot. When someone is all in for less, they can only win the part of the pot they matched (a side pot covers the rest).</p>`,
     roulette: `<p>Tap any number or box on the layout to put your chip there. You can spread chips across as many bets as you like. The wheel spins 20 seconds after the first chip lands, or when you hit Spin now.</p>
       <p><b>Payouts:</b> a single number pays 35 to 1. Dozens (1st/2nd/3rd 12) and columns (2 to 1) pay 2 to 1. Red, black, odd, even, 1–18 and 19–36 pay even money. This is a single-zero European wheel: when the ball lands on 0, only bets on 0 win.</p>`,
     craps: `<p><b>The come-out roll:</b> put chips on the Pass Line, then the shooter rolls. 7 or 11 wins right away; 2, 3 or 12 ("craps") loses. Any other number (4, 5, 6, 8, 9, 10) becomes the <b>point</b> and the puck turns ON.</p>
@@ -86,6 +90,16 @@
     $("#games-btn").setAttribute("aria-expanded", String(!pop.hidden));
   });
   document.addEventListener("click", e => { if (!e.target.closest("#games-menu")) closeGames(); });
+  // Show every game link when they fit; otherwise collapse them into the Games menu.
+  function fitNav() {
+    const bar = $(".topbar"), nav = $("#nav");
+    bar.classList.remove("collapsed");
+    const fits = nav.offsetParent !== null && nav.scrollWidth <= nav.clientWidth + 1 && innerWidth > 900;
+    bar.classList.toggle("collapsed", !fits);
+  }
+  addEventListener("resize", () => requestAnimationFrame(fitNav));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNav);
+  requestAnimationFrame(fitNav);
 
   /* ---------- Lobby ---------- */
   function lobby(el) {
