@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gilded Ace Casino</title>
+<meta name="description" content="A play-money casino you can share with friends: blackjack in five variants, roulette, baccarat, craps, three card poker, slots, video poker and keno, live with room codes.">
+<meta property="og:title" content="Gilded Ace Casino">
+<meta property="og:description" content="Play-money blackjack, roulette, craps, baccarat and more. Open a room and play live with friends.">
+<meta name="theme-color" content="#120509">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23d9b35d'/%3E%3Ccircle cx='32' cy='32' r='24' fill='%232a0a14'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='%23f8e7ad' font-family='serif'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/casino.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#lobby" aria-label="Gilded Ace lobby"><span class="mark">A</span><span class="brand-name">Gilded Ace</span></a>
+    <nav class="nav" aria-label="Games" id="nav">
+      <a href="#lobby">Lobby</a><a href="#blackjack">Blackjack</a><a href="#roulette">Roulette</a><a href="#craps">Craps</a><a href="#baccarat">Baccarat</a><a href="#poker3">3 Card</a><a href="#slots">Slots</a><a href="#videopoker">Video Poker</a><a href="#keno">Keno</a>
+    </nav>
+    <div class="bal-pill" id="bal-pill" title="Your chips"><span class="coin">A</span><b class="num" id="bal">10,000</b></div>
+    <button class="room-btn" id="room-btn" type="button" aria-label="Rooms and chat"><span class="live"></span><span class="t" id="room-label">Play with friends</span><span class="badge" id="chat-badge" hidden>0</span></button>
+    <button class="icon-btn" id="sound-btn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" id="sound-ico"></svg></button>
+  </div>
+</header>
+
+<main id="views"></main>
+
+<footer>
+  <div class="wrap">
+    <div><b>Gilded Ace</b><br>Play money only. Chips have no cash value and can't be bought or cashed out.</div>
+    <div>Multiplayer connects browsers directly through room codes. The host's tab runs the tables, so keep it open while friends play.</div>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Room" aria-hidden="true">
+  <div class="drawer-head"><h2 class="gold-text" id="drawer-title">Play with friends</h2><button class="icon-btn" id="drawer-close" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="chat">
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div class="emotes" id="emotes"></div>
+    <form class="field" id="chat-form" autocomplete="off"><label class="sr" for="chat-in">Message</label><input class="input" id="chat-in" maxlength="240" placeholder="Say something to the table"><button class="btn btn-gold btn-sm" type="submit">Send</button></form>
+  </div>
+</aside>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="bigwin" id="bigwin" role="status"><div class="card2"><div class="k" id="bw-k">Big win</div><div class="h gold-text" id="bw-h">JACKPOT</div><div class="p num" id="bw-p">+0</div></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/dealers.js"></script>
+<script src="js/net.js"></script>
+<script src="js/games/blackjack.js"></script>
+<script src="js/games/roulette.js"></script>
+<script src="js/games/baccarat.js"></script>
+<script src="js/games/craps.js"></script>
+<script src="js/games/poker3.js"></script>
+<script src="js/games/solo.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
