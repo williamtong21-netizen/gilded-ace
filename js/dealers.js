@@ -136,39 +136,38 @@
         tip: ["Merci, {n}. For that, a kiss for luck. Mwah.", "Generous and gorgeous. Dangerous combination.", "You do know how to treat a lady."]
       }
     },
-    rico: {
-      name: "Rico", title: "Dealer · Blackjack",
+    scarlett: {
+      name: "Scarlett", title: "Dealer · Blackjack",
       look: {
-        male: true, skin: ["#dca47a", "#b67a4f", "#86502e"], hair: ["#4a3630", "#16100f", "#040202"], iris: ["#6a4220", "#24140a"],
-        lips: ["#a86450", "#6e3a2a"], browC: "#140c0b", browW: 1.5, browY: 77, bg: "#3c0c1c",
-        defs: u => `<pattern id="${u}stb" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".55" fill="#1a0e0a"/><circle cx="2.4" cy="2.2" r=".45" fill="#1a0e0a"/></pattern>
-          <linearGradient id="${u}vel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a1a20"/><stop offset=".5" stop-color="#0e0709"/><stop offset="1" stop-color="#1e1216"/></linearGradient>
-          <linearGradient id="${u}sat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a1428"/><stop offset=".5" stop-color="#b0304e"/><stop offset="1" stop-color="#5a1428"/></linearGradient>`,
-        hairBack: u => `<path d="M60 92 C56 52 78 32 102 32 C126 32 146 50 140 92 C136 76 132 66 124 62 L76 62 C68 68 62 78 60 92Z" fill="url(#${u}hr)"/>`,
-        hairFront: u => `<path d="M62 84 C58 46 90 30 120 36 C140 42 146 62 139 84 C134 64 122 54 104 53 C86 52 72 62 62 84Z" fill="url(#${u}hr)"/>
-          <path d="M72 56 C84 28 126 26 140 50 C126 40 102 38 72 56Z" fill="url(#${u}hr)"/>
-          <path d="M80 50 C94 36 118 34 132 44 M76 58 C90 46 110 44 124 50" stroke="#7a5a50" stroke-width="1.6" fill="none" opacity=".6" stroke-linecap="round"/>`,
-        faceUnder: u => `<path d="M66 102 Q70 134 100 140 Q130 134 134 102 Q128 126 100 131 Q72 126 66 102Z" fill="url(#${u}stb)" opacity=".55"/><path d="M88 112 Q100 108 112 112 L112 116 Q100 113 88 116Z" fill="url(#${u}stb)" opacity=".6"/>`,
-        top: u => `<g transform="rotate(16 144 70)"><rect x="135" y="52" width="17" height="24" rx="2" fill="#fffdf7" stroke="url(#${u}au)" stroke-width="1"/><text x="143.5" y="68" font-size="10" text-anchor="middle" fill="#c8102e" font-family="serif">A♥</text></g>`,
-        outfit: u => `<path d="M22 222 C26 178 58 160 100 158 C142 160 174 178 178 222Z" fill="url(#${u}vel)"/>
-          <path d="M84 152 L100 200 L116 152Z" fill="#f6f1e8"/><path d="M90 152 L100 174 L110 152Z" fill="url(#${u}nk)"/><path d="M95 160 L100 172 L105 160" stroke="${"#86502e"}" stroke-width="1" fill="none" opacity=".4"/>
-          <path d="M84 152 L100 206 L74 222 L42 222 C48 188 62 166 84 152Z" fill="url(#${u}sat)"/><path d="M116 152 L100 206 L126 222 L158 222 C152 188 138 166 116 152Z" fill="url(#${u}sat)"/>
-          <path d="M84 152 L100 206 M116 152 L100 206" stroke="url(#${u}au)" stroke-width="1.4"/>
-          <path d="M93 160 Q86 178 90 192 M107 160 Q114 178 110 192" stroke="#0a0506" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-          <path d="M140 186 l8 -4 4 8 -9 3Z" fill="#c8102e"/>`
+        skin: ["#fbe0cc", "#efbf9e", "#c98e6c"], hair: ["#e0703a", "#a8361a", "#4a1206"], iris: ["#7ac08a", "#24603a"],
+        lips: ["#c4102c", "#6e0618"], shadow: "#5a2a3a", blush: "#ff7a8a", wing: true, lash: true, browC: "#7a2a12", browW: 1.05, bg: "#3c0c1c",
+        defs: u => `<linearGradient id="${u}vel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a2028"/><stop offset=".5" stop-color="#0e0709"/><stop offset="1" stop-color="#2a161c"/></linearGradient>
+          <pattern id="${u}fr" width="9" height="7" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="#b86a44" opacity=".55"/><circle cx="6" cy="5" r=".6" fill="#b86a44" opacity=".5"/></pattern>`,
+        hairBack: u => `<path d="M52 104 C40 56 70 26 102 26 C136 26 162 56 150 106 C156 136 166 160 160 186 C150 170 142 160 138 146 L64 146 C58 160 50 170 40 186 C34 160 46 132 52 104Z" fill="url(#${u}hr)"/>
+          <path d="M48 120 C42 140 46 160 40 180 M154 120 C160 140 156 160 160 180 M58 96 C52 120 58 140 52 160" stroke="#f0905a" stroke-width="2" fill="none" opacity=".5" stroke-linecap="round"/>`,
+        hairFront: u => `<path d="M60 98 C54 60 76 38 104 38 C130 38 146 56 142 92 C136 68 124 58 110 58 C100 70 82 76 66 80 C62 86 60 92 60 98Z" fill="url(#${u}hr)"/>
+          <path d="M140 92 C150 112 146 132 152 150" stroke="url(#${u}hr)" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <path d="M72 64 C86 50 106 46 124 52 M66 76 C80 70 94 66 106 60" stroke="#f6a070" stroke-width="1.8" fill="none" opacity=".6" stroke-linecap="round"/>`,
+        faceUnder: u => `<ellipse cx="88" cy="104" rx="11" ry="5" fill="url(#${u}fr)"/><ellipse cx="112" cy="104" rx="11" ry="5" fill="url(#${u}fr)"/>`,
+        top: u => `<g transform="rotate(-14 66 62)"><rect x="56" y="48" width="15" height="21" rx="2" fill="#fffdf7" stroke="url(#${u}au)" stroke-width="1"/><text x="63.5" y="62" font-size="9" text-anchor="middle" fill="#1a1013" font-family="serif">A♠</text></g>${earring(u, 62.5, 106)}${earring(u, 137.5, 106)}<circle cx="62.5" cy="114" r="2.6" fill="#fff"/><circle cx="137.5" cy="114" r="2.6" fill="#fff"/>`,
+        outfit: u => `${bareShoulders(u)}<path d="M100 160 L60 222 L140 222Z" fill="url(#${u}vel)"/>
+          <path d="M84 150 L100 160 L116 150" stroke="#0e0709" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M60 222 C64 200 74 186 86 180 L100 190 L114 180 C126 186 136 200 140 222Z" fill="url(#${u}vel)"/>
+          <path d="M84 146 Q100 156 116 146" stroke="url(#${u}au)" stroke-width="3" fill="none"/><circle cx="100" cy="152" r="3" fill="#c8102e" stroke="url(#${u}au)" stroke-width="1"/>
+          <path d="M86 180 L100 190 L114 180" stroke="url(#${u}au)" stroke-width="1.2" fill="none"/>`
       },
       lines: {
-        greet: ["Rico. Cards, charm and questionable decisions. Sit down, {n}.", "Welcome back, {n}. I saved your favorite seat. It's the one next to me.", "Pull up a stool, gorgeous. The shoe is hot. So's the dealer."],
+        greet: ["Scarlett. Cards, charm and questionable decisions. Sit down, {n}.", "Welcome back, {n}. I saved your favorite seat. It's the one right in front of me.", "Pull up a stool, gorgeous. The deck is hot. So's the dealer."],
         bet: ["Chips on the felt. That's how I like it.", "Brave. I like brave.", "Look at you, {n}. All in on yourself."],
-        deal: ["Cards coming your way, beautiful.", "Let's see what the shoe thinks of you.", "Easy now. Don't let me see you sweat."],
-        win: ["Winner winner. Rico pays with a wink.", "That's how it's done, {n}.", "Beat me fair and square. I kind of liked it."],
+        deal: ["Cards coming your way, beautiful.", "Let's see what the deck thinks of you.", "Easy now. Don't let me see you sweat."],
+        win: ["Winner winner. Scarlett pays with a wink.", "That's how it's done, {n}.", "Beat me fair and square. I kind of liked it."],
         lose: ["Ooh. The cards are cold, but you're not.", "House wins this one. Don't hate me, I'm too pretty.", "Shake it off, {n}. Next hand."],
-        big: ["Blackjack! Somebody get this high roller a drink.", "Now THAT is a double down. I'm impressed. And a little flustered."],
+        big: ["Blackjack! Somebody get this high roller a drink.", "Natural twenty-one! Okay, now I'm the one blushing.", "Ace and a face! Come here and let me look at you."],
         bust: ["Twenty-two. Too much of a good thing, {n}.", "Busted. Happens to the best of us. Mostly to you, tonight."],
         push: ["A tie. We'll call it chemistry.", "Push. Neither of us wanted to leave."],
         other: ["{n} is playing like a shark tonight.", "Nice hand, {n}. Everyone else, take notes."],
-        poke: ["Stop staring, {n}. I'm working.", "This jacket? Tailored. The smolder? Natural.", "I deal cards. You deal heartbreak.", "You can hit me. Hit your hand first though.", "Keep looking at me like that and I'll forget how to count to 21."],
-        tip: ["For you, I'd shuffle anything.", "{n}, you know how to treat a dealer.", "A tip! Rico's blushing. That never happens."]
+        poke: ["Stop staring, {n}. I'm working.", "Natural redhead, natural twenty-one. I deal both.", "I deal cards. You deal heartbreak.", "You can hit me. Hit your hand first though.", "Keep looking at me like that and I'll forget how to count to 21."],
+        tip: ["For you, I'd shuffle anything.", "{n}, you know how to treat a dealer.", "A tip! Now I'm blushing. That never happens."]
       }
     },
     celeste: {
@@ -200,33 +199,36 @@
         tip: ["How generous. I'll remember that.", "Merci, {n}. You're officially my favorite.", "A tip! You may kiss my hand."]
       }
     },
-    monty: {
-      name: "Monty", title: "Stickman · Craps",
+    roxy: {
+      name: "Roxy", title: "Stickwoman · Craps",
       look: {
-        male: true, skin: ["#f6d2b6", "#e6b190", "#bf8664"], hair: ["#ffffff", "#d6d0c8", "#9a948c"], iris: ["#8ab07a", "#3a5a2a"],
-        lips: ["#c0806a", "#8a5040"], browC: "#e6e0d8", browW: 1.7, browY: 77, bg: "#14402c",
-        defs: u => `<linearGradient id="${u}vel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a3aa8"/><stop offset=".5" stop-color="#4a1a60"/><stop offset="1" stop-color="#6a2a86"/></linearGradient>`,
-        hairBack: u => `<ellipse cx="63" cy="88" rx="11" ry="18" fill="url(#${u}hr)"/><ellipse cx="137" cy="88" rx="11" ry="18" fill="url(#${u}hr)"/>`,
-        hairFront: u => `<path d="M64 74 Q100 46 136 74 Q120 60 100 60 Q80 60 64 74Z" fill="url(#${u}hr)"/><path d="M58 84 q4 8 2 16 M142 84 q-4 8 -2 16" stroke="#fff" stroke-width="1.6" opacity=".6" fill="none"/>`,
-        faceOver: u => `<path d="M72 92 l-5 2 M72 96 l-5 1 M128 92 l5 2 M128 96 l5 1" stroke="#bf8664" stroke-width="1" opacity=".7"/>
-          <circle cx="85" cy="89" r="12" stroke="url(#${u}au)" stroke-width="2.4" fill="#ffffff14"/><circle cx="115" cy="89" r="12" stroke="url(#${u}au)" stroke-width="2.4" fill="#ffffff14"/><path d="M97 88 h6 M73 88 l-10 -2 M127 88 l10 -2" stroke="url(#${u}au)" stroke-width="2.2"/>
-          <path d="M79 113 Q90 105 100 110 Q110 105 121 113 Q128 119 133 112 Q127 126 115 118 Q107 113 100 115 Q93 113 85 118 Q73 126 67 112 Q72 119 79 113Z" fill="url(#${u}hr)"/>
-          <path d="M141 82 l12 -15" stroke="#f2c230" stroke-width="4" stroke-linecap="round"/><path d="M153 67 l3 -3.4" stroke="#f06a8f" stroke-width="4" stroke-linecap="round"/>`,
-        top: () => `<path d="M52 68 Q100 40 148 68 L152 76 Q100 59 48 76Z" fill="#1f7a4d"/><path d="M46 74 Q100 54 154 74 Q156 88 100 84 Q44 88 46 74Z" fill="#33b878" opacity=".7"/><path d="M50 76 Q100 60 150 76" stroke="#bff0d4" stroke-width="1" opacity=".6" fill="none"/>`,
-        outfit: u => `<path d="M22 222 C26 178 58 160 100 158 C142 160 174 178 178 222Z" fill="#f6f1e8"/><path d="M60 170 v52 M80 164 v58 M120 164 v58 M140 170 v52" stroke="#c8d4e8" stroke-width="1.2"/>
-          <path d="M22 222 C26 182 52 168 80 162 L100 214 L120 162 C148 168 174 182 178 222Z" fill="url(#${u}vel)"/>
-          <circle cx="100" cy="190" r="2.6" fill="url(#${u}au)"/><circle cx="100" cy="204" r="2.6" fill="url(#${u}au)"/><path d="M88 158 L100 165 L112 158 L112 172 L100 165 L88 172Z" fill="#c8102e"/><circle cx="100" cy="165" r="2.4" fill="#8a0a20"/>`
+        skin: ["#e8b48a", "#c98b5e", "#9a5e38"], hair: ["#6a4030", "#2a140c", "#0a0402"], iris: ["#8a5a24", "#3a2008"],
+        lips: ["#ff4a4a", "#a81a24"], shadow: "#2e9a6a", blush: "#ff6a6a", wing: true, lash: true, browC: "#2a140c", browW: 1.1, bg: "#14402c",
+        defs: u => `<pattern id="${u}seq" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#0c5a3e"/><circle cx="2.5" cy="2.5" r="1.4" fill="#1fb07a"/><circle cx="2" cy="2" r=".5" fill="#d8ffe8"/></pattern>
+          <pattern id="${u}dot" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#c8102e"/><circle cx="3" cy="3" r="1.2" fill="#fff"/></pattern>`,
+        hairBack: u => `<g fill="url(#${u}hr)"><circle cx="60" cy="96" r="18"/><circle cx="140" cy="96" r="18"/><circle cx="56" cy="122" r="15"/><circle cx="144" cy="122" r="15"/><circle cx="62" cy="144" r="12"/><circle cx="138" cy="144" r="12"/><ellipse cx="100" cy="66" rx="48" ry="38"/></g>
+          <path d="M50 104 q8 6 2 14 M150 104 q-8 6 -2 14 M58 130 q8 4 2 12 M142 130 q-8 4 -2 12" stroke="#8a5a40" stroke-width="1.6" fill="none" opacity=".6"/>`,
+        hairFront: u => `<path d="M62 86 C60 58 80 42 100 42 C122 42 142 58 138 86 C130 70 118 64 100 64 C84 64 70 70 62 86Z" fill="url(#${u}hr)"/>
+          <path d="M70 56 C76 40 96 34 112 40 C102 46 96 54 98 62 C86 54 76 54 70 56Z" fill="url(#${u}hr)"/><path d="M78 50 C88 42 100 42 108 46" stroke="#8a5a40" stroke-width="1.6" fill="none" opacity=".6"/>
+          <path d="M60 60 Q100 30 140 60 L136 68 Q100 44 64 68Z" fill="url(#${u}dot)"/><path d="M134 58 l14 -10 l2 12Z M136 62 l16 2 l-6 10Z" fill="url(#${u}dot)"/>`,
+        top: u => `<circle cx="62.5" cy="110" r="4" fill="#c8102e" stroke="url(#${u}au)" stroke-width="1"/><circle cx="137.5" cy="110" r="4" fill="#c8102e" stroke="url(#${u}au)" stroke-width="1"/>`,
+        outfit: u => `<path d="M22 222 C26 178 58 160 100 158 C142 160 174 178 178 222Z" fill="#fbf6ee"/>
+          <path d="M84 152 L100 176 L116 152" fill="url(#${u}nk)"/>
+          <path d="M22 222 C26 182 52 168 78 162 L100 206 L122 162 C148 168 174 182 178 222Z" fill="url(#${u}seq)"/>
+          <path d="M78 162 L100 206 L122 162" stroke="url(#${u}au)" stroke-width="1.6" fill="none"/>
+          <path d="M88 160 L100 167 L112 160 L112 174 L100 167 L88 174Z" fill="#c8102e"/><circle cx="100" cy="167" r="2.4" fill="#8a0a20"/>
+          <circle cx="100" cy="190" r="2.4" fill="url(#${u}au)"/><circle cx="100" cy="202" r="2.4" fill="url(#${u}au)"/>`
       },
       lines: {
-        greet: ["Monty's the name, dice are the game. Silver fox, golden arm.", "Step up, {n}. Coming out!", "Welcome to the loudest table in the house."],
-        bet: ["Chips down! Monty approves.", "Bold bet. My second wife liked bold.", "That's a bet with some swagger, {n}."],
-        roll: ["Dice are out! Hands up high!", "Shooter's got the cubes. Give 'em some love.", "Blow on 'em, {n}. Monty won't judge."],
-        win: ["Winner! Pay the line!", "Yo-leven! Monty's heart skips a beat.", "Hot dice, hot shooter. Hotter player."],
-        lose: ["Seven out, line away. Monty's sorry, sweetheart.", "Craps! Don't worry, I'll be gentle with the paperwork.", "The dice giveth, the dice taketh."],
-        big: ["HARDWAY! Somebody hold me.", "Look at that payout! These glasses are fogging up."],
+        greet: ["Roxy's the name, dice are the game. Step up, {n}. Coming out!", "Welcome to the loudest table in the house, sugar.", "Hey, {n}. Ready to make some noise?"],
+        bet: ["Chips down! Roxy approves.", "Ooh, that bet's got swagger, {n}.", "Bold. I like a player with nerve."],
+        roll: ["Dice are out! Hands up high!", "Shooter's got the cubes. Give 'em some love.", "Blow on 'em, {n}. I won't tell."],
+        win: ["Winner! Pay the line!", "Yo-leven! Be still, my heart.", "Hot dice, hot shooter. Hotter player."],
+        lose: ["Seven out, line away. Sorry, sweetheart.", "Craps! Don't worry, I'll be gentle with the paperwork.", "The dice giveth, the dice taketh."],
+        big: ["HARDWAY! Somebody hold me.", "Look at that payout! I'm getting the vapors."],
         other: ["{n} is rolling like a legend.", "Take a bow, {n}."],
-        poke: ["These glasses? Reading. These eyes? Smoldering.", "Silver fox, golden heart, green visor.", "Careful, {n}. I bruise like a peach and blush like one too.", "I've been stickman for 40 years. Still got the moves.", "Wink at me again and I'm telling my book club."],
-        tip: ["A tip! Monty blushes. Monty never blushes.", "Bless you, {n}. Dinner's on you, the next one's on me.", "You're a class act. A classy, classy act."]
+        poke: ["Polka dots and loaded dice. Kidding about the dice.", "Careful, {n}. I bite. Only on a seven-out.", "Twirl my stick? Honey, that's a craps joke.", "I've seen a thousand shooters. You're my favorite tonight.", "Wink at me again and I'm putting you on the hardways."],
+        tip: ["A tip! Roxy blushes. Roxy never blushes.", "Bless you, {n}. Next roll's for you.", "You're a class act. A classy, classy act."]
       }
     },
     jade: {

@@ -102,16 +102,30 @@
     GA.celebrate(220); GA.sfx.big();
   };
 
+  // The full blackjack moment: banner, suit confetti in waves, a fanfare.
+  GA.blackjackParty = (net, kicker) => {
+    const el = GA.$("#bigwin"); if (!el) return;
+    GA.$("#bw-k").textContent = kicker || "Twenty-One Club";
+    GA.$("#bw-h").textContent = "BLACKJACK!";
+    GA.$("#bw-p").textContent = net > 0 ? "+" + GA.fmt(net) + " chips" : "Natural 21";
+    el.classList.add("show", "bj"); clearTimeout(bwT);
+    bwT = setTimeout(() => el.classList.remove("show", "bj"), 3400);
+    GA.celebrate(260, { suits: true });
+    setTimeout(() => GA.celebrate(160, { suits: true }), 650);
+    setTimeout(() => GA.celebrate(120, { suits: true }), 1300);
+    GA.sfx.big(); setTimeout(GA.sfx.coin, 700); setTimeout(GA.sfx.coin, 900);
+  };
+
   /* ---------- Confetti ---------- */
   let parts = [], running = false, fx, fctx;
   function sizeFx() { if (!fx) return; const dpr = Math.min(2, devicePixelRatio || 1); fx.width = innerWidth * dpr; fx.height = innerHeight * dpr; fctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
   function heart(ctx, s) { ctx.beginPath(); ctx.moveTo(0, s * 0.3); ctx.bezierCurveTo(-s, -s * 0.4, -s * 0.4, -s * 1.1, 0, -s * 0.45); ctx.bezierCurveTo(s * 0.4, -s * 1.1, s, -s * 0.4, 0, s * 0.3); ctx.fill(); }
-  GA.celebrate = n => {
+  GA.celebrate = (n, opts = {}) => {
     if (GA.reduced) return;
     if (!fx) { fx = GA.$("#fx"); if (!fx) return; fctx = fx.getContext("2d"); sizeFx(); addEventListener("resize", sizeFx); }
     const cols = ["#f8e7ad", "#d9b35d", "#f06a8f", "#b8172e", "#f6ecd8", "#6d2c8f", "#1e7b4f"];
     for (let i = 0; i < n; i++) {
-      const r = Math.random(), kind = r < 0.25 ? "heart" : r < 0.65 ? "chip" : "spark";
+      const r = Math.random(), kind = opts.suits && r < 0.35 ? "suit" : r < 0.25 ? "heart" : r < 0.65 ? "chip" : "spark";
       parts.push({ kind, x: innerWidth / 2 + (Math.random() - 0.5) * innerWidth * 0.5, y: innerHeight * 0.6, vx: (Math.random() - 0.5) * 16, vy: -Math.random() * 18 - 8,
         s: 6 + Math.random() * 10, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: cols[(Math.random() * cols.length) | 0], life: 0, max: 120 + Math.random() * 80 });
     }
@@ -124,7 +138,8 @@
       p.life++; p.vy += 0.42; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
       fctx.save(); fctx.globalAlpha = 1 - Math.max(0, (p.life - p.max * 0.7) / (p.max * 0.3));
       fctx.translate(p.x, p.y); fctx.rotate(p.r); fctx.fillStyle = p.c;
-      if (p.kind === "heart") heart(fctx, p.s);
+      if (p.kind === "suit") { if (!p.g) { p.g = "♠♥♦♣"[(Math.random() * 4) | 0]; p.c = p.g === "♥" || p.g === "♦" ? "#e2364f" : "#f6ecd8"; fctx.fillStyle = p.c; } fctx.font = `${Math.round(p.s * 2.4)}px serif`; fctx.textAlign = "center"; fctx.textBaseline = "middle"; fctx.fillText(p.g, 0, 0); }
+      else if (p.kind === "heart") heart(fctx, p.s);
       else if (p.kind === "chip") {
         fctx.scale(1, Math.abs(Math.cos(p.r * 2)) * 0.8 + 0.2);
         fctx.beginPath(); fctx.arc(0, 0, p.s, 0, 6.283); fctx.fill();

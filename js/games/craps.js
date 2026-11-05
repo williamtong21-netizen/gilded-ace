@@ -163,7 +163,7 @@
         <div style="margin-top:14px" data-rack></div>
         <p class="rules" style="margin-top:14px">Pass Line wins on 7 or 11 on the come-out and loses on 2, 3 or 12. Any other number becomes the point: roll it again before a 7 to win. Place bets and hardways only work while a point is on, and stay up after they hit.</p>`;
       const q = s => el.querySelector(s);
-      const dealer = GA.dealer(q("[data-dealer]"), "monty");
+      const dealer = GA.dealer(q("[data-dealer]"), "roxy");
       GA.rack(q("[data-rack]"));
       let P = null, lastRoll = null;
       el.addEventListener("click", e => {

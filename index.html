@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="css/casino.css">
+<link rel="stylesheet" href="css/casino.css?v=7">
 </head>
 <body>
 <header class="topbar">
@@ -21,6 +21,10 @@
     <nav class="nav" aria-label="Games" id="nav">
       <a href="#lobby">Lobby</a><a href="#blackjack">Blackjack</a><a href="#roulette">Roulette</a><a href="#craps">Craps</a><a href="#baccarat">Baccarat</a><a href="#poker3">3 Card</a><a href="#slots">Slots</a><a href="#videopoker">Video Poker</a><a href="#keno">Keno</a>
     </nav>
+    <div class="games-menu" id="games-menu">
+      <button class="room-btn" id="games-btn" type="button" aria-expanded="false" aria-controls="games-pop"><span aria-hidden="true">☰</span><span id="games-label">Games</span></button>
+      <div class="games-pop" id="games-pop" hidden></div>
+    </div>
     <div class="bal-pill" id="bal-pill" title="Your chips"><span class="coin">A</span><b class="num" id="bal">10,000</b></div>
     <button class="room-btn" id="room-btn" type="button" aria-label="Rooms and chat"><span class="live"></span><span class="t" id="room-label">Play with friends</span><span class="badge" id="chat-badge" hidden>0</span></button>
     <button class="icon-btn" id="sound-btn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" id="sound-ico"></svg></button>
@@ -52,15 +56,16 @@
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="js/core.js"></script>
-<script src="js/dealers.js"></script>
-<script src="js/net.js"></script>
-<script src="js/games/blackjack.js"></script>
-<script src="js/games/roulette.js"></script>
-<script src="js/games/baccarat.js"></script>
-<script src="js/games/craps.js"></script>
-<script src="js/games/poker3.js"></script>
-<script src="js/games/solo.js"></script>
-<script src="js/app.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script src="js/core.js?v=7"></script>
+<script src="js/dealers.js?v=7"></script>
+<script src="js/net.js?v=7"></script>
+<script src="js/games/blackjack.js?v=7"></script>
+<script src="js/games/roulette.js?v=7"></script>
+<script src="js/games/baccarat.js?v=7"></script>
+<script src="js/games/craps.js?v=7"></script>
+<script src="js/games/poker3.js?v=7"></script>
+<script src="js/games/solo.js?v=7"></script>
+<script src="js/app.js?v=7"></script>
 </body>
 </html>

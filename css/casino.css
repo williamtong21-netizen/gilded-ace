@@ -81,6 +81,16 @@ input,select{font:inherit}
 .nav a{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--muted);padding:7px 10px;border-radius:999px;white-space:nowrap}
 .nav a:hover{color:var(--gold-hi)}
 .nav a[aria-current="page"]{color:var(--ink);background:var(--gold)}
+.games-menu{display:none;position:relative;margin-left:auto;flex:0 0 auto}
+.games-pop{position:absolute;top:calc(100% + 8px);left:0;min-width:220px;padding:8px;border-radius:16px;background:var(--onyx);border:1px solid var(--gold-lo);box-shadow:0 24px 50px -20px #000;display:grid;gap:2px;z-index:60}
+.games-pop a{display:block;padding:10px 14px;border-radius:10px;text-decoration:none;color:var(--ivory);font-size:14px;font-weight:500}
+.games-pop a:hover{background:color-mix(in srgb,var(--gold) 14%,transparent);color:var(--gold-hi)}
+.games-pop a[aria-current="page"]{background:var(--gold);color:var(--ink)}
+@media (max-width:1320px){
+  .nav{display:none}
+  .games-menu{display:block}
+  .bal-pill{margin-left:0}
+}
 .bal-pill{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--onyx);border:1px solid var(--gold-lo);flex:0 0 auto}
 .bal-pill .coin{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold-hi),var(--gold) 55%,var(--gold-lo));display:grid;place-items:center;font-family:var(--display);font-size:13px;color:var(--ink)}
 .bal-pill b{font-family:var(--mono);font-weight:500;font-size:15px;color:var(--gold-hi)}
@@ -432,6 +442,14 @@ main{min-height:70vh}
 .bigwin.show .card2{transform:scale(1)}
 .bigwin .k{font-family:var(--mono);font-size:13px;letter-spacing:.3em;color:var(--rose);text-transform:uppercase}
 .bigwin .h{font-family:var(--display);font-size:clamp(44px,10vw,96px);line-height:1;margin:8px 0}
+.bigwin.bj .card2{background:radial-gradient(circle at 50% 0%,#1d7a57,#06261a 70%);box-shadow:inset 0 0 0 3px var(--gold-hi),0 0 0 8px #06261a,0 0 0 10px var(--gold),0 0 160px 20px color-mix(in srgb,var(--gold) 55%,transparent)}
+.bigwin.bj .h{animation:bjpop .9s cubic-bezier(.3,1.8,.5,1) both,bjshine 1.6s linear .9s infinite;background-size:200% 100%}
+.bigwin.bj .card2::before{content:"A♠  K♥";display:block;font-family:var(--display);font-size:30px;letter-spacing:.2em;color:var(--ivory);margin-bottom:4px;animation:bjpop .7s .15s both}
+@keyframes bjpop{0%{transform:scale(.2) rotate(-12deg);opacity:0}70%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes bjshine{to{background-position:-200% 0}}
+.seat.bjparty{animation:seatparty 1s ease-in-out 4;border-color:var(--gold-hi)!important}
+@keyframes seatparty{50%{box-shadow:0 0 0 3px var(--gold-hi),0 0 50px 6px var(--gold);transform:translateY(-4px)}}
+.seat.bjparty .card{box-shadow:0 0 0 2px var(--gold-hi),0 0 22px var(--gold)}
 .bigwin .p{font-family:var(--mono);font-size:22px;color:var(--win)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);opacity:0;z-index:95;background:var(--ivory);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:500;font-size:14px;box-shadow:0 14px 40px -10px #000;transition:all .3s;max-width:calc(100vw - 32px);text-align:center;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -445,8 +463,6 @@ footer b{font-family:var(--display);font-weight:400;font-size:20px;color:var(--g
 }
 @media (max-width:900px){
   .hero,.roul,.slots,.keno,.how{grid-template-columns:minmax(0,1fr)}
-  .nav{display:none}
-  .bal-pill{margin-left:auto}
 }
 @media (max-width:620px){
   :root{--cw:50px}
@@ -459,6 +475,8 @@ footer b{font-family:var(--display);font-weight:400;font-size:20px;color:var(--g
   .dealer-portrait{width:88px;height:98px}
   .bubble{font-size:17px;padding:9px 12px}
   .bal-pill .coin{display:none}
+  .topbar .wrap{gap:8px}
+  #games-label{display:none}
   .bal-pill{padding:6px 12px}
   .room-btn{padding:8px 12px}
   .bac-hands{grid-template-columns:1fr 1fr;gap:10px}

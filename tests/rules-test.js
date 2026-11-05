@@ -88,7 +88,7 @@ function bj(variant, deal, moves, opts = {}) {
   r = bj("spanish", "7s Kh 7d Qc 7c", ["hit"]);
   check("Spanish 21: 7-7-7 mixed suits pays 3:2 bonus", [r.results, r.net], [["bonus"], 150]);
   r = bj("spanish", "9s 6h 5d 5c 7h 10s", ["hit"]);
-  check("Spanish 21: no tens in the deck", r.P.shoeLeft <= 48, true);
+  check("Spanish 21: no tens in the decks", r.P.shoeLeft <= 96, true);
   r = bj("spanish", "9s 6h 5d 5c 7h Kd", ["hit"]);
   check("Spanish 21: player 21 beats dealer 21", [r.dealer, r.net], ["6,5,K", 100]);
   r = bj("classic", "As 9h Ad 7c Ks 5h 10d", ["split"]);
@@ -119,7 +119,7 @@ function bj(variant, deal, moves, opts = {}) {
   })();
   (() => {
     const { T } = fresh("blackjack");
-    check("Single deck: 52 cards", T.priv.shoe.length, 52);
+    check("Double deck: 104 cards", T.priv.shoe.length, 104);
   })();
 })();
 

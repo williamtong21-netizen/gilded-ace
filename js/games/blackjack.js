@@ -5,11 +5,11 @@
   const SEATS = 5, MAX_BET = 50000;
 
   const V = {
-    classic: { name: "Classic", blurb: "Single deck. Blackjack pays 3 to 2, the dealer stands on soft 17, double after split, late surrender.", decks: 1, h17: false, bj: 1.5, das: true, surrender: true, print: "Blackjack pays 3 to 2 · Dealer stands on all 17s" },
-    frenzy: { name: "Double Down Frenzy", blurb: "Double on any number of cards, then double again, up to three times a hand. After a double you can only double again or stand. Dealer hits soft 17.", decks: 1, h17: true, bj: 1.5, das: true, frenzy: true, print: "Double any time · Up to 3 doubles a hand" },
-    freebet: { name: "Free Bet", blurb: "Free doubles on hard 9, 10 and 11, and free splits on every pair except tens. The house puts up the extra bet. A dealer 22 pushes every hand that's still live.", decks: 1, h17: true, bj: 1.5, das: true, free: true, push22: true, print: "Free doubles · Free splits · Dealer 22 pushes" },
-    exposure: { name: "Double Exposure", blurb: "Both dealer cards are dealt face up. In exchange, blackjack pays even money and the dealer wins ties (tied blackjacks push).", decks: 1, h17: true, bj: 1, das: true, exposure: true, print: "Both dealer cards face up · Dealer wins ties" },
-    spanish: { name: "Spanish 21", blurb: "Single deck with the four tens removed (face cards stay). Your 21 always wins, you can double on any number of cards, and 5, 6 and 7-card 21s or 6-7-8 and 7-7-7 pay bonuses.", decks: 1, h17: true, bj: 1.5, das: true, surrender: true, spanish: true, doubleAny: true, print: "Player 21 always wins · Bonus 21s" }
+    classic: { name: "Classic", blurb: "Double deck. Blackjack pays 3 to 2, the dealer stands on soft 17, double after split, late surrender.", decks: 2, h17: false, bj: 1.5, das: true, surrender: true, print: "Blackjack pays 3 to 2 · Dealer stands on all 17s" },
+    frenzy: { name: "Double Down Frenzy", blurb: "Double on any number of cards, then double again, up to three times a hand. After a double you can only double again or stand. Dealer hits soft 17.", decks: 2, h17: true, bj: 1.5, das: true, frenzy: true, print: "Double any time · Up to 3 doubles a hand" },
+    freebet: { name: "Free Bet", blurb: "Free doubles on hard 9, 10 and 11, and free splits on every pair except tens. The house puts up the extra bet. A dealer 22 pushes every hand that's still live.", decks: 2, h17: true, bj: 1.5, das: true, free: true, push22: true, print: "Free doubles · Free splits · Dealer 22 pushes" },
+    exposure: { name: "Double Exposure", blurb: "Both dealer cards are dealt face up. In exchange, blackjack pays even money and the dealer wins ties (tied blackjacks push).", decks: 2, h17: true, bj: 1, das: true, exposure: true, print: "Both dealer cards face up · Dealer wins ties" },
+    spanish: { name: "Spanish 21", blurb: "Two decks with the tens removed (face cards stay). Your 21 always wins, you can double on any number of cards, and 5, 6 and 7-card 21s or 6-7-8 and 7-7-7 pay bonuses.", decks: 2, h17: true, bj: 1.5, das: true, surrender: true, spanish: true, doubleAny: true, print: "Player 21 always wins · Bonus 21s" }
   };
   const ORDER = ["classic", "frenzy", "freebet", "exposure", "spanish"];
 
@@ -64,7 +64,7 @@
   function newShoe(T) {
     const v = V[T.pub.variant];
     T.priv.shoe = GA.makeShoe(v.decks, v.spanish ? r => r !== "10" : null);
-    T.priv.cut = Math.floor(T.priv.shoe.length * 0.5); // single deck: reshuffle at half
+    T.priv.cut = Math.floor(T.priv.shoe.length * 0.35); // double deck: reshuffle with about a third left
     T.pub.shoeLeft = T.priv.shoe.length;
   }
   function draw(T) { if (!T.priv.shoe.length) newShoe(T); const c = T.priv.shoe.pop(); T.pub.shoeLeft = T.priv.shoe.length; return c; }
@@ -397,8 +397,8 @@
     mount(el) {
       el.innerHTML = `
         <div class="view-head">
-          <div><div class="eyebrow">Blackjack · Five seats · Single deck</div><h1 class="gold-text">Twenty-One Club</h1>
-          <p>Pick a rule set, take a seat and bet. When a friend is in your room, you all play the same deck against Rico.</p></div>
+          <div><div class="eyebrow">Blackjack · Five seats · Double deck</div><h1 class="gold-text">Twenty-One Club</h1>
+          <p>Pick a rule set, take a seat and bet. When a friend is in your room, you all play the same deck against Scarlett.</p></div>
           <div class="who-here" data-who></div>
         </div>
         <div class="variants" data-var></div>
@@ -411,12 +411,12 @@
         </div>
         <div class="table-bar"><div class="status" data-status></div><div class="controls" data-controls></div></div>
         <div style="margin-top:14px" data-rack></div>
-        <p class="rules" style="margin-top:14px">Side bets: <b>Perfect Pairs</b> pays 6:1 for a mixed pair (different colors) and 12:1 for a colored pair (same color). <b>21+3</b> uses your two cards plus the dealer's up card: flush 5:1, straight 10:1, three of a kind 30:1, straight flush 40:1. With one deck, a same-suit pair or suited trips can't happen. <b>Insurance</b> is offered when the dealer shows an ace: it costs half your bet and pays 2:1 if the dealer has blackjack. Tap a betting circle to add your selected chip.</p>`;
+        <p class="rules" style="margin-top:14px">Side bets: <b>Perfect Pairs</b> pays 6:1 for a mixed pair (different colors), 12:1 for a colored pair (same color) and 25:1 for a perfect pair (same suit). <b>21+3</b> uses your two cards plus the dealer's up card: flush 5:1, straight 10:1, three of a kind 30:1, straight flush 40:1, suited trips 100:1. <b>Insurance</b> is offered when the dealer shows an ace: it costs half your bet and pays 2:1 if the dealer has blackjack. Tap a betting circle to add your selected chip.</p>`;
       const q = s => el.querySelector(s);
-      const dealer = GA.dealer(q("[data-dealer]"), "rico");
+      const dealer = GA.dealer(q("[data-dealer]"), "scarlett");
       GA.rack(q("[data-rack]"));
       const cards = GA.cardTracker();
-      let lastCount = 0, P = null;
+      let lastCount = 0, P = null, bjRound = -1;
 
       el.addEventListener("click", e => {
         const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
@@ -447,7 +447,8 @@
           ? `<button class="bspot ${key === "main" ? "main" : ""}" data-act="bet" data-spot="${key}" ${key !== "main" && !s.bet ? "disabled title='Place a main bet first'" : ""}>${label}<b>${amt ? GA.short(amt) : ""}</b></button>`
           : amt ? `<span class="bspot ${key === "main" ? "main" : ""}">${label}<b>${GA.short(amt)}</b></span>` : "";
         const side = (s.side || []).map(x => `<span class="badge ${x.net > 0 ? "w" : "l"}" title="${GA.esc(x.k)}">${GA.esc(x.k)}: ${GA.esc(x.label)}</span>`).join("");
-        return `<div class="seat taken ${mine ? "me" : ""} ${turn && P.phase === "playing" ? "turn" : ""}" style="--c:${pl.color}">
+        const party = s.hands.length === 1 && isBJ(s.hands[0]) && s.hands[0].result !== "push" && s.hands[0].result !== "lose";
+        return `<div class="seat taken ${mine ? "me" : ""} ${party ? "bjparty" : ""} ${turn && P.phase === "playing" ? "turn" : ""}" style="--c:${pl.color}">
           <span class="sname"><i></i>${GA.esc(pl.name)}${mine ? " (you)" : ""}</span>
           <div class="hands">${hands}</div>
           ${side ? `<div class="actions-row">${side}</div>` : ""}
@@ -503,6 +504,10 @@
           q("[data-seats]").innerHTML = P.seats.map((s, i) => seatHTML(s, i, me, mySeat)).join("");
           q("[data-controls]").innerHTML = controls(me);
           status();
+          const mineS = P.seats.find(x => x && x.pid === me);
+          if (mineS && mineS.hands.length === 1 && isBJ(mineS.hands[0]) && bjRound !== P.round && P.phase !== "betting") {
+            bjRound = P.round; dealer.say("big"); GA.sfx.ding(); GA.celebrate(90, { suits: true }); GA.toast("Blackjack! Natural 21.");
+          }
           const count = dc.length + P.seats.reduce((n, s) => n + (s ? s.hands.reduce((m, h) => m + h.cards.length, 0) : 0), 0);
           if (count > lastCount) GA.sfx.card();
           lastCount = count;
@@ -513,15 +518,17 @@
           if (e.kind === "turn" && mine) { dealer.say("deal"); GA.sfx.ding(); }
           else if (e.kind === "bet" && mine && Math.random() < 0.35) dealer.say("bet");
           else if (e.kind === "bust" && mine) { dealer.say("bust"); GA.sfx.lose(); }
-          else if (e.kind === "shuffle") GA.toast("Fresh deck. Rico shuffles with a little too much flair.");
-          else if (e.kind === "insurance") { const s = P && P.seats.find(x => x && x.pid === GA.me.id && x.inRound); if (s) { GA.sfx.ding(); GA.toast("Dealer shows an ace. Insurance pays 2:1 if Rico has blackjack."); } }
+          else if (e.kind === "shuffle") GA.toast("Fresh deck. Scarlett shuffles with a little too much flair.");
+          else if (e.kind === "insurance") { const s = P && P.seats.find(x => x && x.pid === GA.me.id && x.inRound); if (s) { GA.sfx.ding(); GA.toast("Dealer shows an ace. Insurance pays 2:1 if Scarlett has blackjack."); } }
           else if (e.kind === "broke" && mine) GA.toast("Not enough chips for that.");
           else if (e.kind === "dealerbj") dealer.say("lose");
           else if (e.kind === "win" && mine) {
-            if (e.label === "Blackjack!" || e.net >= 2500) { dealer.say("big"); if (e.net >= 1000) GA.bigWin("Blackjack table", e.label || "Big win", e.net); else { GA.sfx.win(); GA.celebrate(80); } }
+            if (e.label === "Blackjack!") { dealer.say("big"); GA.blackjackParty(e.net); }
+            else if (e.net >= 2500) { dealer.say("big"); GA.bigWin("Twenty-One Club", e.label || "Big win", e.net); }
             else { dealer.say("win"); GA.sfx.win(); GA.celebrate(40); }
           } else if (e.kind === "lose" && mine) { dealer.say("lose"); }
           else if (e.kind === "push" && mine) dealer.say("push");
+          else if (e.kind === "win" && !mine && e.label === "Blackjack!") { dealer.say("other", { n: nm }); GA.celebrate(70, { suits: true }); GA.toast(`${nm} hit blackjack!`); }
           else if (e.kind === "win" && !mine && Math.random() < 0.5) dealer.say("other", { n: nm });
         }
       };
