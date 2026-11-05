@@ -52,6 +52,7 @@
           const p = h.players[pid]; if (!p) return;
           p.net = (p.net || 0) + net;
           if (net > (p.best || 0)) p.best = net;
+          h.record(p, g, net);
           h.evt(g, net > 0 ? "win" : net < 0 ? "lose" : "push", { pid, net, label });
         },
         evt: (kind, data) => h.evt(g, kind, data),
@@ -66,6 +67,13 @@
         sys: text => h.sys(text)
       };
     }
+    // Per-table totals and the latest result, shown on every player's rail.
+    record(p, g, net) {
+      p.tbl = p.tbl || {};
+      p.tbl[g] = (p.tbl[g] || 0) + net;
+      p.hands = (p.hands || 0) + 1;
+      p.last = { g, net, at: Date.now() };
+    }
     evt(g, kind, data = {}) {
       this.evts.push(Object.assign({ id: ++this.eid, g, kind, at: Date.now() }, data));
       if (this.evts.length > 40) this.evts.splice(0, this.evts.length - 40);
@@ -76,7 +84,8 @@
       this.players[pid] = {
         name: String(info.name || "Player").slice(0, 20), color: /^#[0-9a-f]{6}$/i.test(info.color) ? info.color : "#d9b35d",
         chips: existing ? existing.chips : Math.max(0, Math.floor(+info.chips || 0)), at: String(info.at || "lobby").slice(0, 20),
-        wagered: existing ? existing.wagered : 0, net: existing ? existing.net : 0, best: existing ? existing.best : 0
+        wagered: existing ? existing.wagered : 0, net: existing ? existing.net : 0, best: existing ? existing.best : 0,
+        tbl: existing ? existing.tbl : {}, hands: existing ? existing.hands : 0, last: existing ? existing.last : null, start: existing ? existing.start : Math.max(0, Math.floor(+info.chips || 0))
       };
       if (!existing && Object.keys(this.players).length > 1) this.sys(`${this.players[pid].name} joined the room`);
       this.publish();
@@ -107,7 +116,7 @@
           if (d < 0) p.wagered = (p.wagered || 0) - d;
           if (typeof m.why === "string" && m.why.startsWith("tip:")) this.sys(`${p.name} tipped ${m.why.slice(4)} ${-d} chips`);
           if (m.why === "bonus") this.sys(`${p.name} collected a ${GA.fmt(d)} chip bonus`);
-          if (typeof m.net === "number") { p.net = (p.net || 0) + m.net; if (m.net > (p.best || 0)) p.best = m.net; }
+          if (typeof m.net === "number") { p.net = (p.net || 0) + m.net; if (m.net > (p.best || 0)) p.best = m.net; if (typeof m.g === "string" && GA.engines[m.g] === undefined && GA.views[m.g]) this.record(p, m.g, m.net); }
           if (m.big) this.evt("*", "solo-big", { pid, label: String(m.big).slice(0, 40), net: m.net || d });
           break;
         }

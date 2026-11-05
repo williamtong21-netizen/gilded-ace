@@ -50,6 +50,13 @@
     const el = viewEl(id);
     if (!mounted[id]) {
       mounted[id] = id === "lobby" ? lobby(el) : GA.views[id].mount(el);
+      if (id !== "lobby") {
+        const r = document.createElement("div");
+        r.className = "rail"; r.setAttribute("data-rail", ""); r.setAttribute("aria-label", "Players at this game");
+        const head = el.querySelector(".view-head");
+        head ? head.after(r) : el.prepend(r);
+        const w = el.querySelector("[data-who]"); if (w) w.remove();
+      }
       if (HOWTO[id]) {
         const d = document.createElement("details");
         d.className = "howto";
@@ -250,6 +257,7 @@
 
   /* ---------- Snapshot rendering ---------- */
   let lastEid = null, lastHost = null, lastBal = null;
+  const railSeen = {};
   function render(snap, force) {
     // balance
     const bal = GA.wallet.bal(), pill = $("#bal-pill");
@@ -264,11 +272,24 @@
     // current view
     const v = mounted[GA.route];
     if (v && v.render) v.render(snap);
-    // who's here line
-    const who = $(`#v-${GA.route} [data-who]`);
-    if (who) {
-      const here = Object.keys(snap.players).filter(pid => snap.players[pid].at === GA.route);
-      who.innerHTML = multi ? here.map(pid => `<span class="ptag" style="--c:${snap.players[pid].color}"><i></i>${GA.esc(snap.players[pid].name)}</span>`).join("") : `<span class="ptag" style="--c:${GA.me.color}"><i></i>${GA.esc(GA.me.name)}</span>`;
+    // player rail: everyone at this game with chips, tonight's result, this table's result and their last hand
+    const rail = $(`#v-${GA.route} [data-rail]`);
+    if (rail) {
+      const g = GA.route, ids = Object.keys(snap.players).filter(pid => snap.players[pid].at === g || pid === GA.me.id);
+      ids.sort((a, b) => (a === GA.me.id ? -1 : b === GA.me.id ? 1 : snap.players[b].chips - snap.players[a].chips));
+      const money = n => `<span class="${n > 0 ? "up" : n < 0 ? "down" : ""}">${n > 0 ? "+" : n < 0 ? "−" : ""}${GA.fmt(Math.abs(n || 0))}</span>`;
+      rail.innerHTML = ids.map(pid => {
+        const p = snap.players[pid], last = p.last && p.last.g === g ? p.last : null;
+        const fresh = last && railSeen[pid] !== last.at && Date.now() - (last.at - (GA.net.skew || 0)) < 15000;
+        if (last) railSeen[pid] = last.at;
+        return `<div class="pcard ${pid === GA.me.id ? "me" : ""}" style="--c:${p.color}">
+          <div class="pc-top"><i></i><b>${GA.esc(p.name)}</b>${pid === GA.me.id ? "<small>you</small>" : ""}</div>
+          <div class="pc-chips num">${GA.fmt(p.chips)}</div>
+          <div class="pc-row"><span>Tonight</span>${money(p.net)}</div>
+          <div class="pc-row"><span>This game</span>${money((p.tbl || {})[g])}</div>
+          <div class="pc-last ${last ? (last.net > 0 ? "up" : last.net < 0 ? "down" : "") : ""} ${fresh ? "flash" : ""}">${last ? `Last hand ${last.net > 0 ? "won" : last.net < 0 ? "lost" : "pushed"} ${last.net ? GA.fmt(Math.abs(last.net)) : ""}` : "No hands yet"}</div>
+        </div>`;
+      }).join("") + (multi ? "" : `<div class="pcard ghost"><span>Open a room and your friends' chips and results show up here.</span></div>`);
     }
     renderChat(snap);
     if (drawer.classList.contains("open")) {

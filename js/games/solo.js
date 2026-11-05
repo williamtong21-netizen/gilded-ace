@@ -4,7 +4,7 @@
   const GA = window.GA;
   const settle = (bet, back, big) => {
     const net = back - bet;
-    GA.net.send({ t: "adj", d: back, net, big: big || undefined });
+    GA.net.send({ t: "adj", d: back, net, big: big || undefined, g: GA.route });
     GA.me.stats.hands++; GA.me.stats.wagered += bet; if (net > GA.me.stats.biggest) GA.me.stats.biggest = net; GA.saveMe();
   };
 

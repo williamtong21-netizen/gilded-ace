@@ -158,6 +158,25 @@ main{min-height:70vh}
 .how b{display:block;font-family:var(--serif);font-size:22px;margin-bottom:4px}
 .how p{margin:0;font-size:14px;color:var(--muted)}
 
+/* ---------- Player rail ---------- */
+.rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:0 0 16px}
+.pcard{border-radius:16px;padding:12px 14px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,var(--onyx)),var(--onyx));border:1px solid color-mix(in srgb,var(--c) 55%,transparent);display:grid;gap:4px;min-width:0}
+.pcard.me{box-shadow:0 0 0 1px var(--c),0 10px 30px -14px var(--c)}
+.pcard.ghost{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;font-size:13px;color:var(--muted)}
+.pc-top{display:flex;align-items:center;gap:6px;min-width:0}
+.pc-top i{width:12px;height:12px;border-radius:50%;background:var(--c);flex:0 0 auto}
+.pc-top b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-top small{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--c);border-radius:999px;padding:1px 7px;flex:0 0 auto}
+.pc-chips{font-family:var(--mono);font-size:22px;color:var(--gold-hi);line-height:1.2}
+.pc-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+.pc-row span:last-child{font-family:var(--mono);color:var(--ivory)}
+.pcard .up{color:var(--win)!important} .pcard .down{color:var(--lose)!important}
+.pc-last{margin-top:4px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 60%,transparent);color:var(--muted);justify-self:start}
+.pc-last.up{background:color-mix(in srgb,var(--win) 18%,transparent)} .pc-last.down{background:color-mix(in srgb,var(--lose) 16%,transparent)}
+.pc-last.flash{animation:lastflash 1.4s ease-out}
+@keyframes lastflash{0%{transform:scale(1.25);box-shadow:0 0 0 3px currentColor}100%{transform:scale(1);box-shadow:0 0 0 0 transparent}}
+@media (max-width:620px){.rail{grid-template-columns:repeat(2,minmax(0,1fr))}.pc-chips{font-size:18px}}
+
 /* ---------- How to play ---------- */
 .howto{margin:0 0 16px;border:1px solid var(--gold-lo);border-radius:16px;background:color-mix(in srgb,var(--onyx) 85%,transparent);max-width:900px}
 .howto summary{cursor:pointer;padding:12px 18px;font-weight:600;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-hi);list-style:none;display:flex;justify-content:space-between;align-items:center}
