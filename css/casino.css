@@ -204,7 +204,7 @@ main{min-height:70vh}
 
 /* ---------- Dealers ---------- */
 .dealer{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;margin-bottom:18px}
-.dealer-portrait{position:relative;width:150px;height:165px;padding:0;border:0;border-radius:50% 50% 44% 44%/56% 56% 44% 44%;overflow:hidden;background:radial-gradient(circle at 50% 30%,var(--velvet-2),var(--ink) 75%);box-shadow:0 0 0 3px var(--gold),0 0 0 7px var(--onyx),0 0 0 8px var(--gold-lo),0 0 34px -4px var(--gold);transition:transform .2s}
+.dealer-portrait{position:relative;width:170px;height:187px;padding:0;border:0;border-radius:50% 50% 44% 44%/56% 56% 44% 44%;overflow:hidden;background:radial-gradient(circle at 50% 30%,var(--velvet-2),var(--ink) 75%);box-shadow:0 0 0 3px var(--gold),0 0 0 7px var(--onyx),0 0 0 8px var(--gold-lo),0 0 34px -4px var(--gold);transition:transform .2s}
 .dealer-portrait:hover{transform:scale(1.04) rotate(-1.5deg)}
 .dealer-portrait svg{width:100%;height:100%;display:block}
 .dealer .fig{animation:breathe 4.5s ease-in-out infinite;transform-origin:50% 100%}
@@ -214,7 +214,15 @@ main{min-height:70vh}
 .dealer .blink .eye,.dealer .wink .eye.r{transform:scaleY(.08)}
 .dealer .blush{opacity:0;transition:opacity .45s}
 .dealer .blushing .blush{opacity:.6}
-.mouth-alt,.mouth-o,.blush{display:none}
+.mouth-alt,.mouth-o,.mouth-k,.blush{display:none}
+.dealer .hair{transform-origin:100px 70px;animation:sway 7s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-.9deg)}50%{transform:rotate(.9deg)}}
+.dealer .flip .hair{animation:hairflip .95s cubic-bezier(.3,1.4,.5,1)}
+@keyframes hairflip{0%{transform:rotate(0)}30%{transform:rotate(-10deg) translateY(-3px)}65%{transform:rotate(4deg)}100%{transform:rotate(0)}}
+.dealer .flip .head{transform:rotate(-5deg)}
+.dealer .kissing .mouth,.dealer .kissing .mouth-alt,.dealer .kissing .mouth-o{display:none}
+.dealer .kissing .mouth-k{display:inline}
+.dealer .wink .eye.r{transition:transform .35s ease}
 .dealer .blush{display:inline}
 .dealer .mouth-alt,.dealer .mouth-o{display:none}
 .dealer .grin .mouth{display:none}
