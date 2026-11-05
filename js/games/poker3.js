@@ -82,6 +82,7 @@
     });
   }
 
+  GA.rules = GA.rules || {}; GA.rules.p3Eval = evalHand;
   GA.engines.poker3 = {
     create(T) { T.pub = { phase: "betting", players: {}, dealer: { cards: [], hidden: true }, deadline: 0, msg: "Ante up.", round: 0 }; T.priv = { shoe: [], dealer: [], last: {} }; },
     handle(T, pid, a, ctx) {

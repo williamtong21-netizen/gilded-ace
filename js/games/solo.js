@@ -108,6 +108,7 @@
     if (groups[0][1] === 2 && +groups[0][0] >= 11) return 8;
     return -1;
   }
+  GA.rules = GA.rules || {}; GA.rules.vpEval = vpEval;
   GA.views.videopoker = {
     title: "Video Poker", solo: true,
     mount(el) {

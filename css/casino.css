@@ -148,6 +148,16 @@ main{min-height:70vh}
 .how b{display:block;font-family:var(--serif);font-size:22px;margin-bottom:4px}
 .how p{margin:0;font-size:14px;color:var(--muted)}
 
+/* ---------- How to play ---------- */
+.howto{margin:0 0 16px;border:1px solid var(--gold-lo);border-radius:16px;background:color-mix(in srgb,var(--onyx) 85%,transparent);max-width:900px}
+.howto summary{cursor:pointer;padding:12px 18px;font-weight:600;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-hi);list-style:none;display:flex;justify-content:space-between;align-items:center}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary::after{content:"+";font-size:20px;line-height:1;color:var(--gold)}
+.howto[open] summary::after{content:"–"}
+.howto > div{padding:0 18px 14px;font-size:15px;color:color-mix(in srgb,var(--ivory) 88%,transparent);line-height:1.6}
+.howto p{margin:0 0 10px;max-width:75ch}
+.howto b{color:var(--gold-hi)}
+
 /* ---------- Tables ---------- */
 .felt{position:relative;border-radius:30px;padding:24px;background:radial-gradient(120% 80% at 50% 0%,var(--felt-2),var(--felt) 60%,color-mix(in srgb,var(--felt) 70%,#000));box-shadow:inset 0 0 0 2px var(--gold-lo),inset 0 0 0 10px color-mix(in srgb,var(--onyx) 80%,transparent),inset 0 0 0 11px var(--gold-lo),inset 0 0 80px #0008,0 40px 80px -40px #000}
 .felt.blue{background:radial-gradient(120% 80% at 50% 0%,#164a70,var(--blue-felt) 60%,#06182a)}

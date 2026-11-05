@@ -4,7 +4,7 @@
   const GA = window.GA, $ = GA.$, $$ = GA.$$;
 
   const GAMES = [
-    { id: "blackjack", name: "Twenty-One Club", tag: "Blackjack · 5 variants", desc: "Classic, Double Down Frenzy, Free Bet, Double Exposure and Spanish 21, plus Perfect Pairs and 21+3.", dealer: "rico", mp: true, art: "21", g: "linear-gradient(160deg,#0f4a36,#081f17)" },
+    { id: "blackjack", name: "Twenty-One Club", tag: "Blackjack · single deck · 5 variants", desc: "Classic, Double Down Frenzy, Free Bet, Double Exposure and Spanish 21, plus Perfect Pairs and 21+3.", dealer: "rico", mp: true, art: "21", g: "linear-gradient(160deg,#0f4a36,#081f17)" },
     { id: "roulette", name: "Roulette Royale", tag: "Single zero", desc: "One wheel for the whole room. Straight up pays 35 to 1.", dealer: "valentina", mp: true, art: "◎", g: "linear-gradient(160deg,#5a1222,#1e050b)" },
     { id: "craps", name: "The Hot Table", tag: "Craps · Shooter rotates", desc: "Pass line, odds, the field, place bets, hardways and the long-shot props.", dealer: "monty", mp: true, art: "⚃", g: "linear-gradient(160deg,#13583f,#062014)" },
     { id: "baccarat", name: "Salon Baccarat", tag: "Punto banco", desc: "Player, Banker or Tie, with pair side bets and a bead road.", dealer: "celeste", mp: true, art: "9", g: "linear-gradient(160deg,#164a70,#06182a)" },
@@ -14,6 +14,27 @@
     { id: "keno", name: "Lucky Keno", tag: "Keno · 80 balls", desc: "Pick up to ten numbers and watch twenty balls drop.", mp: false, art: "80", g: "linear-gradient(160deg,#3b1a6a,#100620)" }
   ];
   const ROUTES = ["lobby", ...GAMES.map(g => g.id)];
+
+  const HOWTO = {
+    blackjack: `<p><b>Goal:</b> finish closer to 21 than the dealer without going over. Number cards count face value, J/Q/K count 10, an ace counts 1 or 11. An ace plus a ten-value card on your first two cards is a blackjack.</p>
+      <p><b>A round:</b> sit, tap the Bet circle to add your chip, then deal. Everyone gets two cards; the dealer shows one card and keeps one face down. On your turn: <b>Hit</b> takes a card, <b>Stand</b> keeps your total, <b>Double</b> doubles your bet for exactly one more card, <b>Split</b> turns a pair into two hands (each with its own bet), <b>Surrender</b> gives up half your bet before playing (Classic and Spanish 21). Over 21 is a bust and loses right away, even if the dealer busts later.</p>
+      <p><b>The dealer</b> plays last and must hit 16 or less. In Classic the dealer stands on every 17; in the other games the dealer hits a soft 17 (a 17 counting an ace as 11). If the dealer shows an ace you're offered <b>insurance</b>: half your bet, pays 2:1 if the dealer has blackjack. Wins pay 1:1, blackjack pays 3:2, ties push (you get your bet back).</p>
+      <p><b>The variants:</b> all deal from a single 52-card deck (48 in Spanish 21). Split aces get one card each, and 21 after a split is not a blackjack. The rules line above the table spells out what changes in each one.</p>`,
+    roulette: `<p>Tap any number or box on the layout to put your chip there. You can spread chips across as many bets as you like. The wheel spins 20 seconds after the first chip lands, or when you hit Spin now.</p>
+      <p><b>Payouts:</b> a single number pays 35 to 1. Dozens (1st/2nd/3rd 12) and columns (2 to 1) pay 2 to 1. Red, black, odd, even, 1–18 and 19–36 pay even money. This is a single-zero European wheel: when the ball lands on 0, only bets on 0 win.</p>`,
+    craps: `<p><b>The come-out roll:</b> put chips on the Pass Line, then the shooter rolls. 7 or 11 wins right away; 2, 3 or 12 ("craps") loses. Any other number (4, 5, 6, 8, 9, 10) becomes the <b>point</b> and the puck turns ON.</p>
+      <p><b>Once there's a point:</b> the shooter keeps rolling. Rolling the point again wins the Pass Line; rolling a 7 first ("seven out") loses it, and the dice pass to the next player. Add <b>Pass Odds</b> behind your line bet (up to 3×), which pays true odds: 2:1 on 4/10, 3:2 on 5/9, 6:5 on 6/8. <b>Don't Pass</b> is the opposite bet: it wins on 2 or 3 on the come-out, pushes on 12, and wins if a 7 comes before the point.</p>
+      <p><b>Other bets:</b> Field is one roll: 3, 4, 9, 10, 11 pay 1:1, and 2 and 12 pay 2:1. Place 6 and 8 pay 7:6 whenever that number rolls before a 7. Hardways win when the number rolls as a pair (like 4-4 for hard 8) and lose on a 7 or the "easy" way. Place bets and hardways are off on the come-out roll. Any Seven, Any Craps and Yo 11 are one-roll long shots.</p>`,
+    baccarat: `<p>Bet on which hand will finish closer to 9: <b>Player</b> or <b>Banker</b>. You can also bet on a <b>Tie</b>, or on either hand's first two cards being a pair.</p>
+      <p><b>Counting:</b> aces are 1, 2 to 9 are face value, and tens and face cards are 0. Only the last digit counts, so 7 + 8 = 15 is a 5. Each hand gets two cards; an 8 or 9 is a "natural" and ends the hand. Third cards follow fixed house rules: the Player draws on 0–5, and the Banker's draw depends on its total and the Player's third card. The table handles all of this for you.</p>
+      <p><b>Payouts:</b> Player 1:1, Banker 0.95:1 (5% commission), Tie 8:1 (Player and Banker bets push on a tie), pairs 11:1.</p>`,
+    poker3: `<p>Put chips on <b>Ante</b> (required) and, if you like, <b>Pair Plus</b>. You and the dealer each get three cards. Look at yours, then <b>Play</b> (add a bet equal to your ante) or <b>Fold</b> (lose the ante).</p>
+      <p><b>Hand ranks, best to worst:</b> straight flush, three of a kind, straight, flush, pair, high card. In three-card poker a straight beats a flush. A-2-3 is the lowest straight.</p>
+      <p><b>The dealer needs queen-high or better to qualify.</b> If the dealer doesn't qualify, your ante pays 1:1 and your play bet comes back. If the dealer qualifies, the higher hand wins: ante and play both pay 1:1, and a tie pushes. If you played, a straight or better also earns an <b>ante bonus</b> (straight 1:1, trips 4:1, straight flush 5:1) win or lose. <b>Pair Plus</b> pays on your hand alone, even if you fold: pair 1:1, flush 3:1, straight 6:1, trips 30:1, straight flush 40:1.</p>`,
+    slots: `<p>Pick your chip; that's the bet on each of the five lines, so a spin costs five chips' worth. Lines are the three rows plus the two diagonals. Three matching symbols on a line, left to right, pays that symbol's amount times your line bet. Two sevens on the first two reels of a line pays 10×.</p>`,
+    videopoker: `<p>Choose your coin size and how many coins (1–5). Press Deal for five cards, tap the cards you want to <b>hold</b>, then press Draw to replace the rest. Your final hand pays from the table. The lowest paying hand is a pair of jacks or better. A royal flush pays 4,000 coins only when you bet 5 coins, so max coins is the classic play.</p>`,
+    keno: `<p>Tap 1 to 10 numbers (or use Quick pick), choose your chip and press Draw. Twenty of the 80 balls are drawn. Your payout depends on how many of your numbers were drawn ("catches"), and the payout table updates for the number of spots you picked.</p>`
+  };
 
   /* ---------- Views ---------- */
   const mounted = {};
@@ -27,7 +48,16 @@
     if (!ROUTES.includes(id)) id = "lobby";
     GA.route = id;
     const el = viewEl(id);
-    if (!mounted[id]) mounted[id] = id === "lobby" ? lobby(el) : GA.views[id].mount(el);
+    if (!mounted[id]) {
+      mounted[id] = id === "lobby" ? lobby(el) : GA.views[id].mount(el);
+      if (HOWTO[id]) {
+        const d = document.createElement("details");
+        d.className = "howto";
+        d.innerHTML = `<summary>How to play ${GA.views[id].title}</summary><div>${HOWTO[id]}</div>`;
+        const head = el.querySelector(".view-head");
+        head ? head.after(d) : el.prepend(d);
+      }
+    }
     $$(".view", viewsEl).forEach(v => (v.hidden = v !== el));
     $$("#nav a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + id ? "page" : "false"));
     document.title = id === "lobby" ? "Gilded Ace Casino" : (GA.views[id] ? GA.views[id].title : "") + " · Gilded Ace";
@@ -64,7 +94,7 @@
       <div class="how">
         <div><b>Open a room</b><p>Tap "Play with friends" and open a room. You get a five-letter code and a link to send.</p></div>
         <div><b>Friends join</b><p>They open the link or type the code. No accounts and no downloads, and they bring their own chips.</p></div>
-        <div><b>Same tables, live</b><p>Everyone shares the blackjack shoe, the roulette wheel, the craps dice and the baccarat shoe. Chat and react as you go.</p></div>
+        <div><b>Same tables, live</b><p>Everyone shares the blackjack deck, the roulette wheel, the craps dice and the baccarat shoe. Chat and react as you go.</p></div>
       </div>
       <div data-board></div>`;
     const q = s => el.querySelector(s);

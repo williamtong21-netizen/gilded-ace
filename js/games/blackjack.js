@@ -1,15 +1,15 @@
-/* Blackjack: five rule sets, five seats, one shared shoe. The engine runs on the room host; the view renders snapshots. */
+/* Blackjack: five rule sets, five seats, one shared deck. The engine runs on the room host; the view renders snapshots. */
 (function () {
   "use strict";
   const GA = window.GA;
   const SEATS = 5, MAX_BET = 50000;
 
   const V = {
-    classic: { name: "Classic", blurb: "Six decks. Blackjack pays 3 to 2, the dealer stands on soft 17, double after split, late surrender.", decks: 6, h17: false, bj: 1.5, das: true, surrender: true, print: "Blackjack pays 3 to 2 · Dealer stands on all 17s" },
-    frenzy: { name: "Double Down Frenzy", blurb: "Double on any number of cards, then double again, up to three times a hand. After a double you can only double again or stand. Dealer hits soft 17.", decks: 6, h17: true, bj: 1.5, das: true, frenzy: true, print: "Double any time · Up to 3 doubles a hand" },
-    freebet: { name: "Free Bet", blurb: "Free doubles on hard 9, 10 and 11, and free splits on every pair except tens. The house puts up the extra bet. A dealer 22 pushes every hand that's still live.", decks: 6, h17: true, bj: 1.5, das: true, free: true, push22: true, print: "Free doubles · Free splits · Dealer 22 pushes" },
-    exposure: { name: "Double Exposure", blurb: "Both dealer cards are dealt face up. In exchange, blackjack pays even money and the dealer wins ties (tied blackjacks push).", decks: 6, h17: true, bj: 1, das: true, exposure: true, print: "Both dealer cards face up · Dealer wins ties" },
-    spanish: { name: "Spanish 21", blurb: "No tens in the shoe (face cards stay). Your 21 always wins, you can double on any number of cards, and 5, 6 and 7-card 21s or 6-7-8 and 7-7-7 pay bonuses.", decks: 6, h17: true, bj: 1.5, das: true, surrender: true, spanish: true, doubleAny: true, print: "Player 21 always wins · Bonus 21s" }
+    classic: { name: "Classic", blurb: "Single deck. Blackjack pays 3 to 2, the dealer stands on soft 17, double after split, late surrender.", decks: 1, h17: false, bj: 1.5, das: true, surrender: true, print: "Blackjack pays 3 to 2 · Dealer stands on all 17s" },
+    frenzy: { name: "Double Down Frenzy", blurb: "Double on any number of cards, then double again, up to three times a hand. After a double you can only double again or stand. Dealer hits soft 17.", decks: 1, h17: true, bj: 1.5, das: true, frenzy: true, print: "Double any time · Up to 3 doubles a hand" },
+    freebet: { name: "Free Bet", blurb: "Free doubles on hard 9, 10 and 11, and free splits on every pair except tens. The house puts up the extra bet. A dealer 22 pushes every hand that's still live.", decks: 1, h17: true, bj: 1.5, das: true, free: true, push22: true, print: "Free doubles · Free splits · Dealer 22 pushes" },
+    exposure: { name: "Double Exposure", blurb: "Both dealer cards are dealt face up. In exchange, blackjack pays even money and the dealer wins ties (tied blackjacks push).", decks: 1, h17: true, bj: 1, das: true, exposure: true, print: "Both dealer cards face up · Dealer wins ties" },
+    spanish: { name: "Spanish 21", blurb: "Single deck with the four tens removed (face cards stay). Your 21 always wins, you can double on any number of cards, and 5, 6 and 7-card 21s or 6-7-8 and 7-7-7 pay bonuses.", decks: 1, h17: true, bj: 1.5, das: true, surrender: true, spanish: true, doubleAny: true, print: "Player 21 always wins · Bonus 21s" }
   };
   const ORDER = ["classic", "frenzy", "freebet", "exposure", "spanish"];
 
@@ -64,7 +64,7 @@
   function newShoe(T) {
     const v = V[T.pub.variant];
     T.priv.shoe = GA.makeShoe(v.decks, v.spanish ? r => r !== "10" : null);
-    T.priv.cut = Math.floor(T.priv.shoe.length * 0.25);
+    T.priv.cut = Math.floor(T.priv.shoe.length * 0.5); // single deck: reshuffle at half
     T.pub.shoeLeft = T.priv.shoe.length;
   }
   function draw(T) { if (!T.priv.shoe.length) newShoe(T); const c = T.priv.shoe.pop(); T.pub.shoeLeft = T.priv.shoe.length; return c; }
@@ -90,7 +90,7 @@
     const live = [];
     P.seats.forEach((s, i) => { if (s && !s.gone && s.bet > 0) live.push(i); });
     if (!live.length) { P.msg = "Place a bet to start the hand."; return; }
-    if (T.priv.shoe.length < T.priv.cut) { newShoe(T); ctx.evt("shuffle", {}); }
+    if (T.priv.shoe.length < Math.max(T.priv.cut, (live.length + 1) * 7)) { newShoe(T); ctx.evt("shuffle", {}); }
     clearTable(P);
     P.round++; P.phase = "dealing"; P.turn = null; T.priv.hole = null;
     P.seats.forEach((s, i) => {
@@ -126,7 +126,35 @@
         else s.side.push({ k: "21+3", label: "No hand", net: -s.t3 });
       }
       if (isBJ(s.hands[0])) s.hands[0].done = true;
+      s.ins = 0; s.insDone = false;
     });
+    // Insurance: offered when the dealer's up card is an ace (not in Double Exposure, where the hole card is visible).
+    if (up.r === "A" && !v.exposure) {
+      P.phase = "insurance";
+      P.msg = "Dealer shows an ace. Insurance?";
+      P.deadline = Date.now() + 12000;
+      ctx.evt("insurance", {});
+      ctx.after(12000, () => endInsurance(T, ctx), "ins");
+      return;
+    }
+    peek(T, ctx);
+  }
+
+  function endInsurance(T, ctx) {
+    const P = T.pub;
+    if (P.phase !== "insurance") return;
+    ctx.cancel("ins"); P.deadline = 0;
+    const dealerBJ = hv([P.dealer.cards[0], T.priv.hole]).t === 21;
+    P.seats.forEach(s => {
+      if (!s || !s.inRound || !s.ins) return;
+      if (dealerBJ) { ctx.pay(s.pid, s.ins * 3); s.side.push({ k: "Insurance", label: "Pays 2:1", net: s.ins * 2 }); }
+      else s.side.push({ k: "Insurance", label: "Lost", net: -s.ins });
+    });
+    peek(T, ctx);
+  }
+
+  function peek(T, ctx) {
+    const P = T.pub, v = V[P.variant], up = P.dealer.cards[0];
     const hole = v.exposure ? P.dealer.cards[1] : T.priv.hole;
     if (hv([up, hole]).t === 21) {
       P.dealer.cards[1] = hole;
@@ -151,8 +179,8 @@
         if (!h.done && s.gone) h.done = true;
         if (!h.done) {
           P.turn = { seat, hand };
-          P.deadline = Date.now() + 25000;
-          ctx.after(25000, () => { const t = P.turn; if (!t) return; const hh = P.seats[t.seat] && P.seats[t.seat].hands[t.hand]; if (hh) hh.done = true; P.deadline = 0; nextTurn(T, ctx); }, "turn");
+          P.deadline = Date.now() + 30000;
+          ctx.after(30000, () => { const t = P.turn; if (!t) return; const hh = P.seats[t.seat] && P.seats[t.seat].hands[t.hand]; if (hh) hh.done = true; P.deadline = 0; nextTurn(T, ctx); }, "turn");
           P.msg = `${ctx.name(s.pid)} to act${s.hands.length > 1 ? `, hand ${hand + 1}` : ""}.`;
           ctx.evt("turn", { pid: s.pid });
           return;
@@ -265,8 +293,8 @@
     } else return;
     if (h.done) { P.deadline = 0; nextTurn(T, ctx); }
     else {
-      P.deadline = Date.now() + 25000;
-      ctx.after(25000, () => { h.done = true; P.deadline = 0; nextTurn(T, ctx); }, "turn");
+      P.deadline = Date.now() + 30000;
+      ctx.after(30000, () => { h.done = true; P.deadline = 0; nextTurn(T, ctx); }, "turn");
     }
   }
 
@@ -332,6 +360,18 @@
         case "deal":
           if (P.phase === "betting" && s && P.seats.some(x => x && x.bet)) startRound(T, ctx);
           return;
+        case "insure":
+        case "noins": {
+          if (P.phase !== "insurance" || !s || !s.inRound || s.insDone) return;
+          if (a.k === "insure") {
+            const amt = Math.floor(s.bet / 2);
+            if (amt > 0 && !ctx.charge(pid, amt)) { ctx.evt("broke", { pid }); return; }
+            s.ins = amt;
+          }
+          s.insDone = true;
+          if (P.seats.every(x => !x || !x.inRound || x.insDone || x.gone)) ctx.after(300, () => endInsurance(T, ctx), "ins");
+          return;
+        }
         default:
           play(T, pid, a.k, ctx);
       }
@@ -357,8 +397,8 @@
     mount(el) {
       el.innerHTML = `
         <div class="view-head">
-          <div><div class="eyebrow">Blackjack · Five seats · Shared shoe</div><h1 class="gold-text">Twenty-One Club</h1>
-          <p>Pick a rule set, take a seat and bet. When a friend is in your room, you all play the same shoe against Rico.</p></div>
+          <div><div class="eyebrow">Blackjack · Five seats · Single deck</div><h1 class="gold-text">Twenty-One Club</h1>
+          <p>Pick a rule set, take a seat and bet. When a friend is in your room, you all play the same deck against Rico.</p></div>
           <div class="who-here" data-who></div>
         </div>
         <div class="variants" data-var></div>
@@ -371,7 +411,7 @@
         </div>
         <div class="table-bar"><div class="status" data-status></div><div class="controls" data-controls></div></div>
         <div style="margin-top:14px" data-rack></div>
-        <p class="rules" style="margin-top:14px">Side bets: <b>Perfect Pairs</b> pays 6:1 mixed, 12:1 colored, 25:1 perfect. <b>21+3</b> uses your two cards plus the dealer's up card: flush 5:1, straight 10:1, trips 30:1, straight flush 40:1, suited trips 100:1. Tap a betting circle to add your selected chip.</p>`;
+        <p class="rules" style="margin-top:14px">Side bets: <b>Perfect Pairs</b> pays 6:1 for a mixed pair (different colors) and 12:1 for a colored pair (same color). <b>21+3</b> uses your two cards plus the dealer's up card: flush 5:1, straight 10:1, three of a kind 30:1, straight flush 40:1. With one deck, a same-suit pair or suited trips can't happen. <b>Insurance</b> is offered when the dealer shows an ace: it costs half your bet and pays 2:1 if the dealer has blackjack. Tap a betting circle to add your selected chip.</p>`;
       const q = s => el.querySelector(s);
       const dealer = GA.dealer(q("[data-dealer]"), "rico");
       GA.rack(q("[data-rack]"));
@@ -424,6 +464,11 @@
             ${P.seats.some(x => x && x.bet) ? `<button class="btn btn-gold" data-act="deal">Deal now</button>` : ""}
             <button class="btn btn-dark btn-sm" data-act="leave">Leave seat</button>`;
         }
+        if (P.phase === "insurance" && s.inRound) {
+          if (s.insDone) return `<span class="muted" style="font-size:14px">${s.ins ? `Insured for ${GA.fmt(s.ins)}.` : "No insurance."} Waiting on the table…</span>`;
+          const h = s.hands[0], bj = h && isBJ(h);
+          return `<button class="btn btn-gold" data-act="insure">${bj ? "Even money" : `Insurance ${GA.short(Math.floor(s.bet / 2))}`}</button><button class="btn btn-dark" data-act="noins">No insurance</button>`;
+        }
         if (P.phase === "playing" && P.turn && P.turn.seat === si) {
           const h = s.hands[P.turn.hand];
           const fd = freeDouble(h, v), fs = canSplit(s, h) && freeSplit(h, v);
@@ -449,7 +494,7 @@
           const locked = P.phase !== "betting" || P.seats.some(x => x && (x.bet || x.pp || x.t3));
           q("[data-var]").innerHTML = ORDER.map(k => `<button type="button" data-act="variant" data-v="${k}" aria-pressed="${k === P.variant}" ${locked && k !== P.variant ? "disabled title='Change rules between hands'" : ""}>${V[k].name}</button>`).join("");
           q("[data-rules]").textContent = v.blurb;
-          q("[data-print]").textContent = v.print + ` · ${P.shoeLeft} cards in the shoe`;
+          q("[data-print]").textContent = v.print + ` · ${P.shoeLeft} cards left in the deck`;
           const dc = P.dealer.cards;
           q("[data-dhand]").innerHTML = dc.map((c, i) => cards.html(`r${P.round}d${i}`, c)).join("") || `<span class="muted" style="font-size:13px;align-self:center">Dealer's cards land here</span>`;
           const dt = hv(dc);
@@ -468,7 +513,8 @@
           if (e.kind === "turn" && mine) { dealer.say("deal"); GA.sfx.ding(); }
           else if (e.kind === "bet" && mine && Math.random() < 0.35) dealer.say("bet");
           else if (e.kind === "bust" && mine) { dealer.say("bust"); GA.sfx.lose(); }
-          else if (e.kind === "shuffle") GA.toast("Fresh shoe. Rico shuffles with a little too much flair.");
+          else if (e.kind === "shuffle") GA.toast("Fresh deck. Rico shuffles with a little too much flair.");
+          else if (e.kind === "insurance") { const s = P && P.seats.find(x => x && x.pid === GA.me.id && x.inRound); if (s) { GA.sfx.ding(); GA.toast("Dealer shows an ace. Insurance pays 2:1 if Rico has blackjack."); } }
           else if (e.kind === "broke" && mine) GA.toast("Not enough chips for that.");
           else if (e.kind === "dealerbj") dealer.say("lose");
           else if (e.kind === "win" && mine) {
