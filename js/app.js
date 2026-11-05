@@ -129,7 +129,7 @@
   addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
   function badge() { const b = $("#chat-badge"); b.hidden = !unread; b.textContent = unread > 9 ? "9+" : unread; }
 
-  let busy = false;
+  let busy = false, joinDraft = "";
   function renderDrawer() {
     const body = $("#drawer-body"), snap = GA.net.snap, mode = GA.net.mode;
     $("#drawer-title").textContent = mode === "solo" ? "Play with friends" : `Room ${GA.net.code}`;
@@ -145,9 +145,15 @@
         try { const code = await GA.net.hostRoom(); GA.toast(`Room ${code} is open. Send your friends the link.`); } catch (e) {}
         busy = false; renderDrawer();
       });
+      const ji = body.querySelector("#join-in");
+      ji.value = joinDraft;
+      ji.addEventListener("input", () => { ji.value = ji.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5); joinDraft = ji.value; });
       body.querySelector("[data-join]").addEventListener("submit", async e => {
-        e.preventDefault(); busy = true; renderDrawer();
-        try { await GA.net.join($("#join-in") ? $("#join-in").value : ""); GA.toast("You're in. Pull up a chair."); } catch (err) {}
+        e.preventDefault();
+        const code = ji.value || joinDraft;
+        if (code.length !== 5) { GA.toast("Room codes are 5 letters."); ji.focus(); return; }
+        busy = true; renderDrawer();
+        try { await GA.net.join(code); joinDraft = ""; GA.toast("You're in. Pull up a chair."); } catch (err) {}
         busy = false; renderDrawer();
       });
       return;
@@ -225,7 +231,7 @@
     renderChat(snap);
     if (drawer.classList.contains("open")) {
       const active = document.activeElement;
-      if (!(active && active.id === "join-in")) renderDrawer();
+      if (!(active && (active.id === "join-in" || active.id === "chat-in"))) renderDrawer();
     }
     // events
     if (snap.host !== lastHost) { lastHost = snap.host; lastEid = null; }
