@@ -49,43 +49,74 @@
       const net = back - staked;
       P.results[pid] = net;
       ctx.result(pid, net, bestMult === 36 ? "Straight up!" : "");
-      T.priv.last[pid] = b;
+      T.priv.last[pid] = Object.assign({}, b); P.canRebet[pid] = true;
     }
     P.history.unshift(n); P.history = P.history.slice(0, 16);
     P.phase = "payout"; P.winning = n;
     P.msg = `${n} ${n === 0 ? "green" : REDS.has(n) ? "red" : "black"}.`;
-    ctx.after(4500, () => { P.phase = "betting"; P.lastBets = P.bets; P.bets = {}; P.results = {}; P.msg = "Place your bets."; });
+    ctx.after(4500, () => { P.phase = "betting"; P.bets = {}; P.results = {}; T.priv.hist = {}; P.msg = "Place your bets."; });
+  }
+
+  const sum = b => Object.values(b || {}).reduce((x, y) => x + y, 0);
+  function arm(T, ctx) {
+    const P = T.pub;
+    P.winning = null;
+    if (!P.deadline) { P.deadline = Date.now() + 20000; ctx.after(20000, () => spin(T, ctx)); }
+  }
+  function remember(T, pid) {
+    const h = (T.priv.hist[pid] = T.priv.hist[pid] || []);
+    h.push(Object.assign({}, T.pub.bets[pid] || {}));
+    if (h.length > 60) h.shift();
   }
 
   GA.engines.roulette = {
     create(T) {
-      T.pub = { phase: "betting", bets: {}, deadline: 0, spin: null, history: [], results: {}, msg: "Place your bets.", winning: null };
-      T.priv = { last: {} };
+      T.pub = { phase: "betting", bets: {}, deadline: 0, spin: null, history: [], results: {}, msg: "Place your bets.", winning: null, canRebet: {} };
+      T.priv = { last: {}, hist: {} };
     },
     handle(T, pid, a, ctx) {
-      const P = T.pub;
+      const P = T.pub, mine = P.bets[pid] || {};
+      const betting = P.phase === "betting";
       if (a.k === "bet") {
-        if (P.phase !== "betting" || !validKey(a.key)) return;
+        if (!betting || !validKey(a.key)) return;
         const amt = Math.round(+a.amt || 0); if (amt <= 0) return;
-        const mine = P.bets[pid] || {}, total = Object.values(mine).reduce((x, y) => x + y, 0);
-        if (total + amt > MAX_TOTAL) return;
+        if (sum(mine) + amt > MAX_TOTAL) { ctx.evt("limit", { pid }); return; }
         if (!ctx.charge(pid, amt)) { ctx.evt("broke", { pid }); return; }
+        remember(T, pid);
         mine[a.key] = (mine[a.key] || 0) + amt; P.bets[pid] = mine;
-        P.winning = null;
-        if (!P.deadline) { P.deadline = Date.now() + 20000; ctx.after(20000, () => spin(T, ctx)); }
-        ctx.evt("bet", { pid });
+        arm(T, ctx); ctx.evt("bet", { pid });
+      } else if (a.k === "double") {
+        // Double every chip you have on the table.
+        const total = sum(mine);
+        if (!betting || !total) return;
+        if (total * 2 > MAX_TOTAL) { ctx.evt("limit", { pid }); return; }
+        if (!ctx.charge(pid, total)) { ctx.evt("broke", { pid }); return; }
+        remember(T, pid);
+        for (const k in mine) mine[k] *= 2;
+        arm(T, ctx); ctx.evt("bet", { pid });
+      } else if (a.k === "undo") {
+        // Take back your last chip (or your last double / rebet).
+        const h = T.priv.hist[pid];
+        if (!betting || !h || !h.length) return;
+        const prev = h.pop(), back = sum(mine) - sum(prev);
+        if (back > 0) ctx.refund(pid, back);
+        if (sum(prev)) P.bets[pid] = prev; else delete P.bets[pid];
+        if (!Object.keys(P.bets).length) { ctx.cancel(); P.deadline = 0; }
       } else if (a.k === "clear") {
-        if (P.phase !== "betting" || !P.bets[pid]) return;
-        ctx.refund(pid, Object.values(P.bets[pid]).reduce((x, y) => x + y, 0));
-        delete P.bets[pid];
+        if (!betting || !P.bets[pid]) return;
+        ctx.refund(pid, sum(mine));
+        delete P.bets[pid]; T.priv.hist[pid] = [];
         if (!Object.keys(P.bets).length) { ctx.cancel(); P.deadline = 0; }
       } else if (a.k === "rebet") {
-        if (P.phase !== "betting" || P.bets[pid] || !T.priv.last[pid]) return;
-        const L = T.priv.last[pid], sum = Object.values(L).reduce((x, y) => x + y, 0);
-        if (!ctx.charge(pid, sum)) { ctx.evt("broke", { pid }); return; }
-        P.bets[pid] = Object.assign({}, L); P.winning = null;
-        if (!P.deadline) { P.deadline = Date.now() + 20000; ctx.after(20000, () => spin(T, ctx)); }
-        ctx.evt("bet", { pid });
+        // Repeat last spin's bets, optionally at double size.
+        const L = T.priv.last[pid], x = a.x === 2 ? 2 : 1;
+        if (!betting || P.bets[pid] || !L) return;
+        const total = sum(L) * x;
+        if (total > MAX_TOTAL) { ctx.evt("limit", { pid }); return; }
+        if (!ctx.charge(pid, total)) { ctx.evt("broke", { pid }); return; }
+        remember(T, pid);
+        P.bets[pid] = {}; for (const k in L) P.bets[pid][k] = L[k] * x;
+        arm(T, ctx); ctx.evt("bet", { pid });
       } else if (a.k === "spin") {
         if (P.bets[pid]) spin(T, ctx);
       }
@@ -93,7 +124,7 @@
     leave(T, pid, ctx) {
       const P = T.pub;
       if (P.phase === "betting" && P.bets[pid]) {
-        ctx.refund(pid, Object.values(P.bets[pid]).reduce((x, y) => x + y, 0));
+        ctx.refund(pid, sum(P.bets[pid]));
         delete P.bets[pid];
         if (!Object.keys(P.bets).length) { ctx.cancel(); P.deadline = 0; }
       }
@@ -143,7 +174,7 @@
       el.addEventListener("click", e => {
         const c = e.target.closest("[data-key]");
         if (c) { GA.net.act("roulette", { k: "bet", key: c.dataset.key, amt: GA.chip }); GA.sfx.chip(); return; }
-        const b = e.target.closest("[data-act]"); if (b && !b.disabled) GA.net.act("roulette", { k: b.dataset.act });
+        const b = e.target.closest("[data-act]"); if (b && !b.disabled) { GA.net.act("roulette", { k: b.dataset.act, x: b.dataset.x ? +b.dataset.x : undefined }); GA.sfx.chip(); }
       });
 
       // Wheel
@@ -182,23 +213,24 @@
         c.beginPath(); c.arc(bx, by, R * 0.032, 0, 7); c.fillStyle = g; c.fill();
         c.restore();
       }
+      // The wheel stays put; the ball is launched around the rim, slows, bounces and drops into its pocket.
+      const pocketAngle = n => rot + ORDER.indexOf(n) * SEG - Math.PI / 2;
       function animate(n) {
-        const idx = ORDER.indexOf(n), r0 = rot;
-        const want = (((-idx * SEG - r0) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        const r1 = r0 + Math.PI * 2 * 4 + want, dur = GA.reduced ? 1000 : SPIN_MS, t0 = performance.now();
+        const TAU = Math.PI * 2, a0 = ballA, target = pocketAngle(n);
+        const sweep = TAU * 7 + ((((a0 - target) % TAU) + TAU) % TAU);
+        const dur = GA.reduced ? 1000 : SPIN_MS, t0 = performance.now();
         let lastTick = 0;
         cancelAnimationFrame(anim);
         const frame = now => {
-          const t = Math.min(1, (now - t0) / dur), e1 = 1 - Math.pow(1 - t, 3), e2 = 1 - Math.pow(1 - t, 2.4);
-          rot = r0 + (r1 - r0) * e1;
-          ballA = -Math.PI / 2 - (1 - e2) * Math.PI * 14;
+          const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 2.6);
+          ballA = a0 - sweep * e;
           if (t < 0.08) ballR = 0.7 + 0.215 * (t / 0.08);
-          else if (t < 0.62) ballR = 0.915;
-          else { const k = (t - 0.62) / 0.38; ballR = 0.915 - 0.215 * Math.min(1, k * 1.25) + Math.sin(k * 26) * 0.018 * (1 - k); }
+          else if (t < 0.6) ballR = 0.915;
+          else { const k = (t - 0.6) / 0.4; ballR = 0.915 - 0.215 * Math.min(1, k * 1.3) + Math.abs(Math.sin(k * 22)) * 0.03 * (1 - k); }
           draw();
-          if (now - lastTick > 60 + t * 260 && t < 0.97) { GA.sfx.tick(); lastTick = now; }
+          if (now - lastTick > 60 + t * 300 && t < 0.97) { GA.sfx.tick(); lastTick = now; }
           if (t < 1) anim = requestAnimationFrame(frame);
-          else { rot = r1 % (Math.PI * 2); ballR = 0.7; ballA = -Math.PI / 2; draw(); }
+          else { ballR = 0.7; ballA = target; draw(); GA.sfx.thud(); }
         };
         anim = requestAnimationFrame(frame);
       }
@@ -215,7 +247,7 @@
           const me = GA.me.id, mine = P.bets[me] || {};
           if (P.spin && P.spin.id !== lastSpinId) {
             if (lastSpinId !== null && P.phase === "spinning") { animate(P.spin.n); dealer.say("spin"); }
-            else if (P.spin) { const idx = ORDER.indexOf(P.spin.n); rot = -idx * SEG; draw(); }
+            else if (P.spin) { ballA = pocketAngle(P.spin.n); ballR = 0.7; draw(); }
             lastSpinId = P.spin.id;
           }
           if (lastSpinId === null && !P.spin) lastSpinId = 0;
@@ -232,10 +264,16 @@
           q("[data-hist]").innerHTML = `<span class="eyebrow" style="margin-right:6px">Last spins</span>` + (P.history.length ? P.history.map(n => `<span class="hball ${colorOf(n)}">${n}</span>`).join("") : `<span class="muted" style="font-size:13px">No spins yet</span>`);
           const total = Object.values(mine).reduce((a, b) => a + b, 0);
           const betting = P.phase === "betting";
-          q("[data-controls]").innerHTML = `${total ? `<span class="stack"><i></i>${GA.fmt(total)} on the table</span>` : ""}
-            ${betting && !total ? `<button class="btn btn-ghost btn-sm" data-act="rebet">Rebet</button>` : ""}
-            ${betting && total ? `<button class="btn btn-ghost btn-sm" data-act="clear">Clear</button><button class="btn btn-gold" data-act="spin">Spin now</button>` : ""}
-            ${P.results && P.results[me] != null ? `<span class="badge ${P.results[me] > 0 ? "w" : P.results[me] < 0 ? "l" : "p"}">${P.results[me] >= 0 ? "+" : "−"}${GA.fmt(Math.abs(P.results[me]))}</span>` : ""}`;
+          q("[data-controls]").innerHTML = betting ? (total
+              ? `<span class="stack"><i></i>${GA.fmt(total)} on the table</span>
+                 <button class="btn btn-ghost btn-sm" data-act="undo">Undo</button>
+                 <button class="btn btn-ghost btn-sm" data-act="clear">Clear</button>
+                 <button class="btn btn-ghost btn-sm" data-act="double">Double ×2</button>
+                 <button class="btn btn-gold" data-act="spin">Spin now</button>`
+              : (P.canRebet && P.canRebet[me]
+                  ? `<button class="btn btn-ghost btn-sm" data-act="rebet">Rebet</button><button class="btn btn-ghost btn-sm" data-act="rebet" data-x="2">Rebet ×2</button>`
+                  : `<span class="muted" style="font-size:13px">Tap the layout to place chips.</span>`))
+            : `${total ? `<span class="stack"><i></i>${GA.fmt(total)} on the table</span>` : ""}${P.results && P.results[me] != null ? `<span class="badge ${P.results[me] > 0 ? "w" : P.results[me] < 0 ? "l" : "p"}">${P.results[me] >= 0 ? "+" : "−"}${GA.fmt(Math.abs(P.results[me]))}</span>` : ""}`;
           status();
         },
         tick: status,
@@ -248,6 +286,7 @@
           } else if (e.kind === "lose" && mine) { dealer.say("lose"); GA.sfx.lose(); }
           else if (e.kind === "win" && !mine && Math.random() < 0.5) dealer.say("other", { n: snap.players[e.pid] ? snap.players[e.pid].name : "" });
           else if (e.kind === "broke" && mine) GA.toast("Not enough chips for that bet.");
+          else if (e.kind === "limit" && mine) GA.toast("That would go over the 100,000 table limit.");
         }
       };
     }

@@ -223,6 +223,26 @@ function p3(deal, decision = "play", pp = 0) {
   check("Roulette: red pays 1:1 (1 is red)", spin(1, [["red", 100]]), 100);
   check("Roulette: zero loses outside bets", spin(0, [["red", 100], ["even", 100], ["low", 100]]), -300);
   check("Roulette: dozen and column pay 2:1", spin(34, [["d3", 100], ["c1", 100]]), 400);
+  (() => {
+    const { T, act, chips, me } = fresh("roulette");
+    const before = chips();
+    act({ k: "bet", key: "red", amt: 100 }); act({ k: "bet", key: "n17", amt: 25 });
+    act({ k: "double" });
+    check("Roulette: Double doubles every chip on the table", [T.pub.bets[me].red, T.pub.bets[me].n17, before - chips()], [200, 50, 250]);
+    act({ k: "undo" });
+    check("Roulette: Undo takes back the double", [T.pub.bets[me].red, before - chips()], [100, 125]);
+    act({ k: "undo" }); act({ k: "undo" });
+    check("Roulette: Undo all the way refunds everything", [T.pub.bets[me], chips() - before], [undefined, 0]);
+  })();
+  (() => {
+    const { T, act, chips, me } = fresh("roulette");
+    GA.rand = k => (k === 37 ? ORDER.indexOf(2) : realRand(k));
+    act({ k: "bet", key: "red", amt: 100 }); act({ k: "spin" }); flush(); flush();
+    GA.rand = realRand;
+    const before = chips();
+    act({ k: "rebet", x: 2 });
+    check("Roulette: Rebet ×2 repeats last bets at double size", [T.pub.bets[me] && T.pub.bets[me].red, before - chips()], [200, 200]);
+  })();
 })();
 
 /* ================= VIDEO POKER ================= */
